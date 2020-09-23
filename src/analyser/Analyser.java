@@ -4,7 +4,6 @@ import error.CompilationError;
 import instruction.Instruction;
 import tokenizer.Token;
 import tokenizer.TokenType;
-import org.apache.commons.lang3.tuple;
 
 import java.util.*;
 
@@ -12,7 +11,7 @@ public final class Analyser {
 
     TokenList tokenList;
 
-    public Pair<List<Instruction>, Optional<CompilationError>> Analyser() {
+    public Map<List<Instruction>, Optional<CompilationError>> Analyser() {
         Optional<CompilationError> err = analyseProgram();
         LinkedHashMap<List<Instruction>, Optional<CompilationError>> map = new LinkedHashMap<>();
         if(err.isEmpty()){
