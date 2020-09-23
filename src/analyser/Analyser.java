@@ -1,45 +1,72 @@
 package analyser;
 
 import error.CompilationError;
+import instruction.Instruction;
+import tokenizer.Token;
+import tokenizer.TokenType;
+import org.apache.commons.lang3.tuple;
 
-import java.util.Optional;
+import java.util.*;
 
 public final class Analyser {
 
-    public Optional<CompilationError> Analyser(){
+    TokenList tokenList;
+
+    public Pair<List<Instruction>, Optional<CompilationError>> Analyser() {
+        Optional<CompilationError> err = analyseProgram();
+        LinkedHashMap<List<Instruction>, Optional<CompilationError>> map = new LinkedHashMap<>();
+        if(err.isEmpty()){
+            map.put(new ArrayList<>(), err);
+        }else {
+            map.put(tokenList.instructions, Optional.empty());
+        }
+        return map;
+    }
+
+    // <程序> ::= 'begin'<主过程>'end'
+    private Optional<CompilationError> analyseProgram() {
+        // 示例函数，示例如何调用子程序
+        Optional<Token> token = tokenList.nextToken();
+        if(token.isEmpty() || token.get().getTokenType() != TokenType.BEGIN){
+
+        }
+        // 'begin'
         return Optional.empty();
     }
 
-    // <程序>
-    private Optional<CompilationError> analyseProgram(){
+    private Optional<CompilationError> analyseMain() {
         return Optional.empty();
     }
 
-    private Optional<CompilationError> analyseMain(){
+    private Optional<CompilationError> analyseConstantDeclaration() {
         return Optional.empty();
     }
-    private Optional<CompilationError> analyseConstantDeclaration(){
+
+    private Optional<CompilationError> analyseVariableDeclaration() {
         return Optional.empty();
     }
-    private Optional<CompilationError> analyseVariableDeclaration(){
+
+    private Optional<CompilationError> analyseStatementSequence() {
         return Optional.empty();
     }
-    private Optional<CompilationError> analyseStatementSequence(){
+
+    private Optional<CompilationError> analyseConstantExpression() {
         return Optional.empty();
     }
-    private Optional<CompilationError> analyseConstantExpression(){
+
+    private Optional<CompilationError> analyseExpression() {
         return Optional.empty();
     }
-    private Optional<CompilationError> analyseExpression(){
+
+    private Optional<CompilationError> analyseAssignmentStatement() {
         return Optional.empty();
     }
-    private Optional<CompilationError> analyseAssignmentStatement(){
+
+    private Optional<CompilationError> analyseItem() {
         return Optional.empty();
     }
-    private Optional<CompilationError> analyseItem(){
-        return Optional.empty();
-    }
-    private Optional<CompilationError> analyseFactor(){
+
+    private Optional<CompilationError> analyseFactor() {
         return Optional.empty();
     }
 }
