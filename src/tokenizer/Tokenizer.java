@@ -25,6 +25,51 @@ public class Tokenizer {
         linesBuffer = new ArrayList<>();
     }
 
+    public Pair<Optional<Token>, Optional<CompilationError>> NextToken() {
+        if (!initialized) {
+            readAll();
+        }
+        if (isEOF()) {
+            return new Pair<>(Optional.empty(), Optional.of(new CompilationError(ErrorCode.ErrEOF, 0, 0)));
+        }
+        Pair<Optional<Token>, Optional<CompilationError>> p = nextToken();
+        if (p.getValue().isPresent()) {
+            return p;
+        }
+        Token token = p.getKey().orElse(null);
+        if (token == null) {
+            return new Pair<>(Optional.empty(), Optional.of(new CompilationError(ErrorCode.ErrStreamError, 0, 0)));
+        }
+        CompilationError err = checkToken(token).orElse(null);
+        if (err != null) {
+            return new Pair<>(p.getKey(), Optional.of(err));
+        }
+        return new Pair<>(p.getKey(), Optional.empty());
+    }
+
+    public Pair<ArrayList<Token>, Optional<CompilationError>> AllTokens() {
+        ArrayList<Token> result = new ArrayList<>();
+        while (true) {
+            Pair<Optional<Token>, Optional<CompilationError>> p = NextToken();
+            if (p.getValue().isPresent()) {
+                if (p.getValue().get().getErr() == ErrorCode.ErrEOF) {
+                    return new Pair<>(result, Optional.empty());
+                } else {
+                    return new Pair<>(new ArrayList<>(), p.getValue());
+                }
+            }
+            if (p.getKey().isPresent()) {
+                result.add(p.getKey().get());
+            }
+        }
+    }
+
+    public Pair<Optional<Token>, Optional<CompilationError>> nextToken() {
+//todo:
+        return new Pair<>(Optional.empty(), Optional.empty());
+    }
+
+
     public Optional<CompilationError> checkToken(Token token) {
         switch (token.getTokenType()) {
             case IDENTIFIER: {
