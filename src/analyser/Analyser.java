@@ -2,6 +2,7 @@ package analyser;
 
 import error.CompilationError;
 import instruction.Instruction;
+import javafx.util.Pair;
 import tokenizer.Token;
 import tokenizer.TokenType;
 
@@ -11,15 +12,13 @@ public final class Analyser {
 
     TokenList tokenList;
 
-    public Map<List<Instruction>, Optional<CompilationError>> Analyser() {
+    public Pair<List<Instruction>, Optional<CompilationError>> analyse() {
         Optional<CompilationError> err = analyseProgram();
-        LinkedHashMap<List<Instruction>, Optional<CompilationError>> map = new LinkedHashMap<>();
         if(err.isEmpty()){
-            map.put(new ArrayList<>(), err);
+            return new Pair<>(new ArrayList<>(), err);
         }else {
-            map.put(tokenList.instructions, Optional.empty());
+            return new Pair<>(tokenList.instructions, Optional.empty());
         }
-        return map;
     }
 
     // <程序> ::= 'begin'<主过程>'end'

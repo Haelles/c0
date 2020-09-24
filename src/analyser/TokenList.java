@@ -1,6 +1,7 @@
 package analyser;
 
 import instruction.Instruction;
+import javafx.util.Pair;
 import tokenizer.Token;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public class TokenList {
     ArrayList<Token> tokens;
     Integer offset;
     ArrayList<Instruction> instructions;
-    LinkedHashMap<Integer, Integer> current_pos;
+    Pair<Integer, Integer> current_pos;
     // 为了简单处理，我们直接把符号表耦合在语法分析里
     // 变量                   示例
     // uninitializedVars    var a;

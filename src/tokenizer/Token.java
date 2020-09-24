@@ -48,7 +48,7 @@ public class Token {
         return Objects.hash(tokenType, value, startPos, endPos);
     }
 
-    public String GeValueString() {
+    public String getValueString() {
         if (value instanceof Integer || value instanceof String || value instanceof Character) {
             return value.toString();
         }
