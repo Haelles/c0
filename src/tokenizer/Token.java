@@ -1,24 +1,25 @@
 package tokenizer;
 
-import error.CompilationError;
-import javafx.util.*;
+import error.TokenizeError;
+import util.Pos;
 
 import java.util.Objects;
 
 public class Token {
     private TokenType tokenType;
     private Object value;
-    private Pair<Integer, Integer> startPos;
-    private Pair<Integer, Integer> endPos;
+    private Pos startPos;
+    private Pos endPos;
 
-    public Token(TokenType tokenType, Object value, Integer startLine, Integer startColumn, Integer endLine, Integer endColumn) {
+    public Token(TokenType tokenType, Object value, Integer startLine, Integer startColumn, Integer endLine,
+            Integer endColumn) {
         this.tokenType = tokenType;
         this.value = value;
-        this.startPos = new Pair<>(startLine, startColumn);
-        this.endPos = new Pair<>(endLine, endColumn);
+        this.startPos = new Pos(startLine, startColumn);
+        this.endPos = new Pos(endLine, endColumn);
     }
 
-    public Token(TokenType tokenType, Object value, Pair<Integer, Integer> startPos, Pair<Integer, Integer> endPos) {
+    public Token(TokenType tokenType, Object value, Pos startPos, Pos endPos) {
         this.tokenType = tokenType;
         this.value = value;
         this.startPos = startPos;
@@ -34,13 +35,13 @@ public class Token {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Token token = (Token) o;
-        return tokenType == token.tokenType &&
-                Objects.equals(value, token.value) &&
-                Objects.equals(startPos, token.startPos) &&
-                Objects.equals(endPos, token.endPos);
+        return tokenType == token.tokenType && Objects.equals(value, token.value)
+                && Objects.equals(startPos, token.startPos) && Objects.equals(endPos, token.endPos);
     }
 
     @Override
@@ -52,10 +53,8 @@ public class Token {
         if (value instanceof Integer || value instanceof String || value instanceof Character) {
             return value.toString();
         }
-        CompilationError.DieAndPrint("No suitable cast for token value.");
-        return "Invalid";
+        throw new Error("No suitable cast for token value.");
     }
-
 
     public TokenType getTokenType() {
         return tokenType;
@@ -73,19 +72,19 @@ public class Token {
         this.value = value;
     }
 
-    public Pair<Integer, Integer> getStartPos() {
+    public Pos getStartPos() {
         return startPos;
     }
 
-    public void setStartPos(Pair<Integer, Integer> startPos) {
+    public void setStartPos(Pos startPos) {
         this.startPos = startPos;
     }
 
-    public Pair<Integer, Integer> getEndPos() {
+    public Pos getEndPos() {
         return endPos;
     }
 
-    public void setEndPos(Pair<Integer, Integer> endPos) {
+    public void setEndPos(Pos endPos) {
         this.endPos = endPos;
     }
 }

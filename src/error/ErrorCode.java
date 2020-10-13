@@ -1,23 +1,8 @@
 package error;
 
 public enum ErrorCode {
-    ErrNoError, // Should be only used internally.
-    ErrStreamError,
-    ErrEOF,
-    ErrInvalidInput,
-    ErrInvalidIdentifier,
-    ErrIntegerOverflow, // int32_t overflow.
-    ErrNoBegin,
-    ErrNoEnd,
-    ErrNeedIdentifier,
-    ErrConstantNeedValue,
-    ErrNoSemicolon,
-    ErrInvalidVariableDeclaration,
-    ErrIncompleteExpression,
-    ErrNotDeclared,
-    ErrAssignToConstant,
-    ErrDuplicateDeclaration,
-    ErrNotInitialized,
-    ErrInvalidAssignment,
-    ErrInvalidPrint
+    NoError, // Should be only used internally.
+    StreamError, EOF, InvalidInput, InvalidIdentifier, IntegerOverflow, // int32_t overflow.
+    NoBegin, NoEnd, NeedIdentifier, ConstantNeedValue, NoSemicolon, InvalidVariableDeclaration, IncompleteExpression,
+    NotDeclared, AssignToConstant, DuplicateDeclaration, NotInitialized, InvalidAssignment, InvalidPrint, ExpectedToken
 }

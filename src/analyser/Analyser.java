@@ -1,70 +1,130 @@
 package analyser;
 
-import error.CompilationError;
+import error.AnalyzeError;
+import error.CompileError;
+import error.ErrorCode;
+import error.ExpectedTokenError;
+import error.TokenizeError;
 import instruction.Instruction;
-import javafx.util.Pair;
 import tokenizer.Token;
 import tokenizer.TokenType;
+import tokenizer.Tokenizer;
 
 import java.util.*;
 
 public final class Analyser {
 
-    TokenList tokenList;
+    Tokenizer tokenizer;
+    ArrayList<Instruction> instructions;
 
-    public Pair<List<Instruction>, Optional<CompilationError>> analyse() {
-        Optional<CompilationError> err = analyseProgram();
-        if(err.isEmpty()){
-            return new Pair<>(new ArrayList<>(), err);
-        }else {
-            return new Pair<>(tokenList.instructions, Optional.empty());
+    Token peekedToken = null;
+
+    public List<Instruction> analyse() throws CompileError {
+        analyseProgram();
+        return instructions;
+    }
+
+    /**
+     * 查看下一个 Token
+     * 
+     * @return
+     * @throws TokenizeError
+     */
+    private Token peek() throws TokenizeError {
+        if (peekedToken == null) {
+            peekedToken = tokenizer.nextToken();
+        }
+        return peekedToken;
+    }
+
+    /**
+     * 获取下一个 Token
+     * 
+     * @return
+     * @throws TokenizeError
+     */
+    private Token next() throws TokenizeError {
+        if (peekedToken != null) {
+            var token = peekedToken;
+            peekedToken = null;
+            return token;
+        } else {
+            return tokenizer.nextToken();
         }
     }
 
-    // <程序> ::= 'begin'<主过程>'end'
-    private Optional<CompilationError> analyseProgram() {
+    /**
+     * 如果下一个 token 的类型是 tt，则前进一个 token 并返回
+     * 
+     * @param tt 类型
+     * @return 如果匹配则返回这个 token，否则返回 null
+     * @throws TokenizeError
+     */
+    private Token peekExpect(TokenType tt) throws TokenizeError {
+        var token = peek();
+        if (token.getTokenType() == tt) {
+            return next();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * 如果下一个 token 的类型是 tt，则前进一个 token 并返回，否则抛出异常
+     * 
+     * @param tt 类型
+     * @return 这个 token
+     * @throws CompileError 如果类型不匹配
+     */
+    private Token expect(TokenType tt) throws CompileError {
+        var token = peek();
+        if (token.getTokenType() == tt) {
+            return next();
+        } else {
+            throw new ExpectedTokenError(tt, token, null);
+        }
+    }
+
+    /**
+     * <程序> ::= 'begin'<主过程>'end'
+     */
+    private void analyseProgram() throws CompileError {
         // 示例函数，示例如何调用子程序
-        Optional<Token> token = tokenList.nextToken();
-        if(token.isEmpty() || token.get().getTokenType() != TokenType.BEGIN){
-
-        }
         // 'begin'
-        return Optional.empty();
+        expect(TokenType.Begin);
+
+        analyseMain();
+
+        // 'end'
+        expect(TokenType.End);
+        expect(TokenType.EOF);
     }
 
-    private Optional<CompilationError> analyseMain() {
-        return Optional.empty();
+    private void analyseMain() throws CompileError {
+
     }
 
-    private Optional<CompilationError> analyseConstantDeclaration() {
-        return Optional.empty();
+    private void analyseConstantDeclaration() throws CompileError {
     }
 
-    private Optional<CompilationError> analyseVariableDeclaration() {
-        return Optional.empty();
+    private void analyseVariableDeclaration() throws CompileError {
     }
 
-    private Optional<CompilationError> analyseStatementSequence() {
-        return Optional.empty();
+    private void analyseStatementSequence() throws CompileError {
     }
 
-    private Optional<CompilationError> analyseConstantExpression() {
-        return Optional.empty();
+    private void analyseConstantExpression() throws CompileError {
     }
 
-    private Optional<CompilationError> analyseExpression() {
-        return Optional.empty();
+    private void analyseExpression() throws CompileError {
     }
 
-    private Optional<CompilationError> analyseAssignmentStatement() {
-        return Optional.empty();
+    private void analyseAssignmentStatement() throws CompileError {
     }
 
-    private Optional<CompilationError> analyseItem() {
-        return Optional.empty();
+    private void analyseItem() throws CompileError {
     }
 
-    private Optional<CompilationError> analyseFactor() {
-        return Optional.empty();
+    private void analyseFactor() throws CompileError {
     }
 }
