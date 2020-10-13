@@ -13,8 +13,6 @@ public class ExpectedTokenError extends CompileError {
     List<TokenType> expecTokenType;
     Token token;
 
-    Pos pos;
-
     @Override
     public ErrorCode getErr() {
         return ErrorCode.ExpectedToken;
@@ -22,7 +20,7 @@ public class ExpectedTokenError extends CompileError {
 
     @Override
     public Pos getPos() {
-        return pos;
+        return token.getStartPos();
     }
 
     /**
@@ -31,11 +29,10 @@ public class ExpectedTokenError extends CompileError {
      * @param code
      * @param pos
      */
-    public ExpectedTokenError(TokenType expectedTokenType, Token token, Pos pos) {
+    public ExpectedTokenError(TokenType expectedTokenType, Token token) {
         this.expecTokenType = new ArrayList<>();
         this.expecTokenType.add(expectedTokenType);
         this.token = token;
-        this.pos = pos;
     }
 
     /**
@@ -44,10 +41,9 @@ public class ExpectedTokenError extends CompileError {
      * @param code
      * @param pos
      */
-    public ExpectedTokenError(List<TokenType> expectedTokenType, Token token, Pos pos) {
+    public ExpectedTokenError(List<TokenType> expectedTokenType, Token token) {
         this.expecTokenType = expectedTokenType;
         this.token = token;
-        this.pos = pos;
     }
 
 }

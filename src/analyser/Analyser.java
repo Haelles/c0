@@ -54,7 +54,7 @@ public final class Analyser {
         }
     }
 
-    private boolean isNextTokenType(TokenType tt) throws TokenizeError {
+    private boolean isNextToken(TokenType tt) throws TokenizeError {
         var token = peek();
         return token.getTokenType() == tt;
     }
@@ -66,7 +66,7 @@ public final class Analyser {
      * @return 如果匹配则返回这个 token，否则返回 null
      * @throws TokenizeError
      */
-    private Token peekExpect(TokenType tt) throws TokenizeError {
+    private Token nextIf(TokenType tt) throws TokenizeError {
         var token = peek();
         if (token.getTokenType() == tt) {
             return next();
@@ -87,7 +87,7 @@ public final class Analyser {
         if (token.getTokenType() == tt) {
             return next();
         } else {
-            throw new ExpectedTokenError(tt, token, null);
+            throw new ExpectedTokenError(tt, token);
         }
     }
 
@@ -113,7 +113,7 @@ public final class Analyser {
     private void analyseConstantDeclaration() throws CompileError {
         // 示例函数，示例如何解析常量声明
         // 如果下一个 token 是 const 就继续
-        while (peekExpect(TokenType.Const) != null) {
+        while (nextIf(TokenType.Const) != null) {
             // 变量名
             var nameToken = expect(TokenType.Ident);
 
@@ -167,24 +167,24 @@ public final class Analyser {
 
     private void analyseFactor() throws CompileError {
         boolean negate;
-        if (peekExpect(TokenType.Minus) != null) {
+        if (nextIf(TokenType.Minus) != null) {
             negate = true;
             // 计算结果需要被 0 减
             instructions.add(new Instruction(Operation.LIT, 0));
         } else {
-            peekExpect(TokenType.Plus);
+            nextIf(TokenType.Plus);
             negate = false;
         }
 
-        if (isNextTokenType(TokenType.Ident)) {
+        if (isNextToken(TokenType.Ident)) {
             // 调用相应的处理函数
-        } else if (isNextTokenType(TokenType.Uint)) {
+        } else if (isNextToken(TokenType.Uint)) {
             // 调用相应的处理函数
-        } else if (isNextTokenType(TokenType.LParen)) {
+        } else if (isNextToken(TokenType.LParen)) {
             // 调用相应的处理函数
         } else {
             // 都不是，摸了
-            throw new ExpectedTokenError(List.of(TokenType.Ident, TokenType.Uint, TokenType.LParen), next(), null);
+            throw new ExpectedTokenError(List.of(TokenType.Ident, TokenType.Uint, TokenType.LParen), next());
         }
 
         if (negate) {
