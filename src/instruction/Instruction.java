@@ -6,6 +6,11 @@ public class Instruction {
     private Operation opt;
     Integer x;
 
+    public Instruction(Operation opt) {
+        this.opt = opt;
+        this.x = 0;
+    }
+
     public Instruction(Operation opt, Integer x) {
         this.opt = opt;
         this.x = x;
@@ -18,11 +23,12 @@ public class Instruction {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Instruction that = (Instruction) o;
-        return opt == that.opt &&
-                Objects.equals(x, that.x);
+        return opt == that.opt && Objects.equals(x, that.x);
     }
 
     @Override

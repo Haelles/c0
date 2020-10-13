@@ -6,6 +6,7 @@ import error.ErrorCode;
 import error.ExpectedTokenError;
 import error.TokenizeError;
 import instruction.Instruction;
+import instruction.Operation;
 import tokenizer.Token;
 import tokenizer.TokenType;
 import tokenizer.Tokenizer;
@@ -53,8 +54,13 @@ public final class Analyser {
         }
     }
 
+    private boolean isNextTokenType(TokenType tt) throws TokenizeError {
+        var token = peek();
+        return token.getTokenType() == tt;
+    }
+
     /**
-     * 如果下一个 token 的类型是 tt，则前进一个 token 并返回
+     * 如果下一个 token 的类型是 tt，则前进一个 token 并返回这个 token
      * 
      * @param tt 类型
      * @return 如果匹配则返回这个 token，否则返回 null
@@ -101,30 +107,89 @@ public final class Analyser {
     }
 
     private void analyseMain() throws CompileError {
-
+        throw new Error("Not implemented");
     }
 
     private void analyseConstantDeclaration() throws CompileError {
+        // 示例函数，示例如何解析常量声明
+        // 如果下一个 token 是 const 就继续
+        while (peekExpect(TokenType.Const) != null) {
+            // 变量名
+            var nameToken = expect(TokenType.Ident);
+
+            // 等于号
+            expect(TokenType.Equal);
+
+            // 常表达式
+            analyseConstantExpression();
+
+            // 分号
+            expect(TokenType.Semicolon);
+        }
     }
 
     private void analyseVariableDeclaration() throws CompileError {
+        throw new Error("Not implemented");
     }
 
     private void analyseStatementSequence() throws CompileError {
+        throw new Error("Not implemented");
+    }
+
+    private void analyseStatement() throws CompileError {
+        throw new Error("Not implemented");
     }
 
     private void analyseConstantExpression() throws CompileError {
+        throw new Error("Not implemented");
     }
 
     private void analyseExpression() throws CompileError {
+        throw new Error("Not implemented");
     }
 
     private void analyseAssignmentStatement() throws CompileError {
+        throw new Error("Not implemented");
+    }
+
+    private void analyseOutputStatement() throws CompileError {
+        expect(TokenType.Print);
+        expect(TokenType.LParen);
+        analyseExpression();
+        expect(TokenType.RParen);
+        expect(TokenType.Semicolon);
+        instructions.add(new Instruction(Operation.WRT));
     }
 
     private void analyseItem() throws CompileError {
+        throw new Error("Not implemented");
     }
 
     private void analyseFactor() throws CompileError {
+        boolean negate;
+        if (peekExpect(TokenType.Minus) != null) {
+            negate = true;
+            // 计算结果需要被 0 减
+            instructions.add(new Instruction(Operation.LIT, 0));
+        } else {
+            peekExpect(TokenType.Plus);
+            negate = false;
+        }
+
+        if (isNextTokenType(TokenType.Ident)) {
+            // 调用相应的处理函数
+        } else if (isNextTokenType(TokenType.Uint)) {
+            // 调用相应的处理函数
+        } else if (isNextTokenType(TokenType.LParen)) {
+            // 调用相应的处理函数
+        } else {
+            // 都不是，摸了
+            throw new ExpectedTokenError(List.of(TokenType.Ident, TokenType.Uint, TokenType.LParen), next(), null);
+        }
+
+        if (negate) {
+            instructions.add(new Instruction(Operation.SUB));
+        }
+        throw new Error("Not implemented");
     }
 }
