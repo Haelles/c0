@@ -20,6 +20,11 @@ public final class Analyser {
 
     Token peekedToken = null;
 
+    public Analyser(Tokenizer tokenizer) {
+        this.tokenizer = tokenizer;
+        this.instructions = new ArrayList<>();
+    }
+
     public List<Instruction> analyse() throws CompileError {
         analyseProgram();
         return instructions;

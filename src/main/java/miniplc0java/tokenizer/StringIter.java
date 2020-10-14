@@ -13,7 +13,7 @@ public class StringIter {
     // 以行为基础的缓冲区
     ArrayList<String> linesBuffer;
 
-    static Scanner scanner;
+    Scanner scanner;
     // 指向下一个要读取的字符
     Pos ptr;
 
@@ -21,7 +21,8 @@ public class StringIter {
 
     Optional<Character> peeked;
 
-    public StringIter() {
+    public StringIter(Scanner scanner) {
+        this.scanner = scanner;
         ptr = new Pos(0, 0);
         linesBuffer = new ArrayList<>();
     }
