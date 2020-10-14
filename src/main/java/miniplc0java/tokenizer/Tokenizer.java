@@ -16,7 +16,7 @@ public class Tokenizer {
      * 获取下一个 Token
      * 
      * @return
-     * @throws TokenizeError 如果解析有异常
+     * @throws TokenizeError 如果解析有异常则抛出
      */
     public Token nextToken() throws TokenizeError {
         it.readAll();

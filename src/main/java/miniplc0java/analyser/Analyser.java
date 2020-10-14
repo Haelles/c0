@@ -59,7 +59,14 @@ public final class Analyser {
         }
     }
 
-    private boolean isNextToken(TokenType tt) throws TokenizeError {
+    /**
+     * 如果下一个 token 的类型是 tt，则返回 true
+     * 
+     * @param tt
+     * @return
+     * @throws TokenizeError
+     */
+    private boolean check(TokenType tt) throws TokenizeError {
         var token = peek();
         return token.getTokenType() == tt;
     }
@@ -181,11 +188,11 @@ public final class Analyser {
             negate = false;
         }
 
-        if (isNextToken(TokenType.Ident)) {
+        if (check(TokenType.Ident)) {
             // 调用相应的处理函数
-        } else if (isNextToken(TokenType.Uint)) {
+        } else if (check(TokenType.Uint)) {
             // 调用相应的处理函数
-        } else if (isNextToken(TokenType.LParen)) {
+        } else if (check(TokenType.LParen)) {
             // 调用相应的处理函数
         } else {
             // 都不是，摸了

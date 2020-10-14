@@ -11,20 +11,27 @@ import miniplc0java.tokenizer.StringIter;
 import miniplc0java.tokenizer.TokenType;
 import miniplc0java.tokenizer.Tokenizer;
 
+import net.sourceforge.argparse4j.*;
+import net.sourceforge.argparse4j.impl.Arguments;
+import net.sourceforge.argparse4j.inf.ArgumentAction;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.Namespace;
+
 public class App {
     public static void main(String[] args) throws CompileError {
-        if (args.length < 3 || (!args[1].equals("tokenize") && !args[1].equals("analyze"))) {
-            System.out.println("Usage: miniplc0java <command> <file>");
-            System.out.println();
-            System.out.println("Commands:");
-            System.out.println("  tokenize        Tokenize the file");
-            System.out.println("  analyze         Analyse the file and output opcodes");
-            System.exit(1);
+        var argparse = buildArgparse();
+        Namespace result;
+        try {
+            result = argparse.parseArgs(args);
+        } catch (ArgumentParserException e1) {
+            argparse.handleError(e1);
             return;
         }
 
-        var filename = args[2];
-        var file = new File(filename);
+        var inputFile = result.getString("input");
+        var outputFile = result.getString("output");
+        var file = new File(inputFile);
         Scanner scanner;
         try {
             scanner = new Scanner(file);
@@ -54,6 +61,17 @@ public class App {
                 System.out.println(instruction.toString());
             }
         }
+    }
+
+    private static ArgumentParser buildArgparse() {
+        var builder = ArgumentParsers.newFor("miniplc0-java");
+        var parser = builder.build();
+        parser.addArgument("-t", "--tokenize").help("Tokenize the input").action(Arguments.storeTrue());
+        parser.addArgument("-a", "--analyse").help("Analyze the input").action(Arguments.storeTrue());
+        parser.addArgument("-o", "--output").help("Set the output file").required(true).nargs(1).dest("output")
+                .action(Arguments.store());
+        parser.addArgument("file").nargs(1).required(true).dest("input").action(Arguments.store()).help("Input file");
+        return parser;
     }
 
     private static Tokenizer tokenize(StringIter iter) {
