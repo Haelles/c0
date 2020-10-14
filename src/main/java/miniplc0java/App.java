@@ -1,13 +1,15 @@
+package miniplc0java;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-import analyser.Analyser;
-import error.CompileError;
-import instruction.Instruction;
-import tokenizer.StringIter;
-import tokenizer.TokenType;
-import tokenizer.Tokenizer;
+import miniplc0java.analyser.Analyser;
+import miniplc0java.error.CompileError;
+import miniplc0java.instruction.Instruction;
+import miniplc0java.tokenizer.StringIter;
+import miniplc0java.tokenizer.TokenType;
+import miniplc0java.tokenizer.Tokenizer;
 
 public class App {
     public static void main(String[] args) throws CompileError {

@@ -1,15 +1,15 @@
-package analyser;
+package miniplc0java.analyser;
 
-import error.AnalyzeError;
-import error.CompileError;
-import error.ErrorCode;
-import error.ExpectedTokenError;
-import error.TokenizeError;
-import instruction.Instruction;
-import instruction.Operation;
-import tokenizer.Token;
-import tokenizer.TokenType;
-import tokenizer.Tokenizer;
+import miniplc0java.error.AnalyzeError;
+import miniplc0java.error.CompileError;
+import miniplc0java.error.ErrorCode;
+import miniplc0java.error.ExpectedTokenError;
+import miniplc0java.error.TokenizeError;
+import miniplc0java.instruction.Instruction;
+import miniplc0java.instruction.Operation;
+import miniplc0java.tokenizer.Token;
+import miniplc0java.tokenizer.TokenType;
+import miniplc0java.tokenizer.Tokenizer;
 
 import java.util.*;
 

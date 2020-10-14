@@ -1,10 +1,10 @@
-package tokenizer;
+package miniplc0java.tokenizer;
 
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Scanner;
 
-import util.Pos;
+import miniplc0java.util.Pos;
 
 /**
  * 这是一个从 C++ 版本抄过来的字符迭代器

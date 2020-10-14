@@ -1,4 +1,4 @@
-package instruction;
+package miniplc0java.instruction;
 
 import java.util.Objects;
 

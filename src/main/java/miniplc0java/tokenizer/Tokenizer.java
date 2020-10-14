@@ -1,7 +1,7 @@
-package tokenizer;
+package miniplc0java.tokenizer;
 
-import error.TokenizeError;
-import error.ErrorCode;
+import miniplc0java.error.TokenizeError;
+import miniplc0java.error.ErrorCode;
 
 public class Tokenizer {
 

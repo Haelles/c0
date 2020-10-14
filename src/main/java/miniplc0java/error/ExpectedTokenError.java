@@ -1,11 +1,11 @@
-package error;
+package miniplc0java.error;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import tokenizer.Token;
-import tokenizer.TokenType;
-import util.Pos;
+import miniplc0java.tokenizer.Token;
+import miniplc0java.tokenizer.TokenType;
+import miniplc0java.util.Pos;
 
 public class ExpectedTokenError extends CompileError {
     private static final long serialVersionUID = 1L;
