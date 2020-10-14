@@ -1,5 +1,4 @@
-FROM openjdk:12
+FROM gradle:jdk14
 WORKDIR /app
 COPY src /app/
-RUN mkdir -p dist
-RUN javac -cp src -d dist
+RUN gradle build
