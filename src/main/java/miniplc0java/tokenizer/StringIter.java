@@ -11,20 +11,18 @@ import miniplc0java.util.Pos;
  */
 public class StringIter {
     // 以行为基础的缓冲区
-    ArrayList<String> linesBuffer;
+    ArrayList<String> linesBuffer = new ArrayList<>();
 
     Scanner scanner;
     // 指向下一个要读取的字符
-    Pos ptr;
+    Pos ptr = new Pos(0, 0);
 
-    boolean initialized;
+    boolean initialized = false;
 
-    Optional<Character> peeked;
+    Optional<Character> peeked = Optional.empty();
 
     public StringIter(Scanner scanner) {
         this.scanner = scanner;
-        ptr = new Pos(0, 0);
-        linesBuffer = new ArrayList<>();
     }
 
     // 从这里开始其实是一个基于行号的缓冲区的实现

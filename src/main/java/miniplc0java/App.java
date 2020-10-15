@@ -1,7 +1,11 @@
 package miniplc0java;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Scanner;
 
 import miniplc0java.analyser.Analyser;
@@ -29,37 +33,61 @@ public class App {
             return;
         }
 
-        var inputFile = result.getString("input");
-        var outputFile = result.getString("output");
-        var file = new File(inputFile);
-        Scanner scanner;
-        try {
-            scanner = new Scanner(file);
-        } catch (FileNotFoundException e) {
-            System.err.println("Cannot find file.");
-            e.printStackTrace();
-            System.exit(2);
-            return;
+        var inputFileName = result.getString("input");
+        var outputFileName = result.getString("output");
+
+        InputStream input;
+        if (inputFileName.equals("-")) {
+            input = System.in;
+        } else {
+            try {
+                input = new FileInputStream(inputFileName);
+            } catch (FileNotFoundException e) {
+                System.err.println("Cannot find input file.");
+                e.printStackTrace();
+                System.exit(2);
+                return;
+            }
         }
+
+        PrintStream output;
+        if (outputFileName.equals("-")) {
+            output = System.out;
+        } else {
+            try {
+                output = new PrintStream(new FileOutputStream(outputFileName));
+            } catch (FileNotFoundException e) {
+                System.err.println("Cannot open output file.");
+                e.printStackTrace();
+                System.exit(2);
+                return;
+            }
+        }
+
+        Scanner scanner;
+        scanner = new Scanner(input);
         var iter = new StringIter(scanner);
         var tokenizer = tokenize(iter);
 
-        if (args[1].equals("tokenize")) {
+        if (result.getBoolean("tokenize")) {
             // tokenize
             while (true) {
                 var token = tokenizer.nextToken();
                 if (token.getTokenType().equals(TokenType.EOF)) {
                     break;
                 }
-                System.out.println(token.toString());
+                output.println(token.toString());
             }
-        } else {
+        } else if (result.getBoolean("analyse")) {
             // analyze
             var analyzer = new Analyser(tokenizer);
             var instructions = analyzer.analyse();
             for (Instruction instruction : instructions) {
-                System.out.println(instruction.toString());
+                output.println(instruction.toString());
             }
+        } else {
+            System.err.println("Please specify either '--analyse' or '--tokenize'.");
+            System.exit(3);
         }
     }
 
@@ -68,9 +96,9 @@ public class App {
         var parser = builder.build();
         parser.addArgument("-t", "--tokenize").help("Tokenize the input").action(Arguments.storeTrue());
         parser.addArgument("-a", "--analyse").help("Analyze the input").action(Arguments.storeTrue());
-        parser.addArgument("-o", "--output").help("Set the output file").required(true).nargs(1).dest("output")
+        parser.addArgument("-o", "--output").help("Set the output file").required(true).dest("output")
                 .action(Arguments.store());
-        parser.addArgument("file").nargs(1).required(true).dest("input").action(Arguments.store()).help("Input file");
+        parser.addArgument("file").required(true).dest("input").action(Arguments.store()).help("Input file");
         return parser;
     }
 

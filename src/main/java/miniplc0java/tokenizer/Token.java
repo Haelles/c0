@@ -87,4 +87,14 @@ public class Token {
     public void setEndPos(Pos endPos) {
         this.endPos = endPos;
     }
+
+    @Override
+    public String toString() {
+        var sb = new StringBuilder();
+        sb.append("Line: ").append(this.startPos.row).append(' ');
+        sb.append("Column: ").append(this.startPos.col).append(' ');
+        sb.append("Type: ").append(this.tokenType).append(' ');
+        sb.append("Value: ").append(this.value);
+        return sb.toString();
+    }
 }

@@ -25,7 +25,7 @@ public class Tokenizer {
         skipSpaceCharacters();
 
         if (it.isEOF()) {
-            throw new TokenizeError(ErrorCode.EOF, 0, 0);
+            return new Token(TokenType.EOF, null, it.currentPos(), it.currentPos());
         }
 
         char peek = it.peekChar();

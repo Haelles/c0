@@ -51,4 +51,23 @@ public class Instruction {
     public void setX(Integer x) {
         this.x = x;
     }
+
+    @Override
+    public String toString() {
+        switch (this.opt) {
+            case ADD:
+            case DIV:
+            case ILL:
+            case MUL:
+            case SUB:
+            case WRT:
+                return String.format("%s", this.opt);
+            case LIT:
+            case LOD:
+            case STO:
+                return String.format("%s %s", this.opt, this.x);
+            default:
+                return "ILL";
+        }
+    }
 }

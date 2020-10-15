@@ -1,11 +1,11 @@
 [jobs.miniplc0-tokenize]
 build = {source = "dockerfile", path = "."}
 run = [
-  "java -jar builds/libs/miniplc0java.jar -t $input > $output",
+  "java -jar build/libs/miniplc0java.jar -t $input -o $output",
 ]
 
 [jobs.miniplc0-analyse]
 build = {source = "dockerfile", path = "."}
 run = [
-  "java -jar builds/libs/miniplc0java.jar -a $input > $output",
+  "java -jar build/libs/miniplc0java.jar -a $input -o $output",
 ]
