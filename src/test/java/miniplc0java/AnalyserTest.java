@@ -3,6 +3,6 @@ package miniplc0java;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class AppTest {
+public class AnalyserTest {
 
 }

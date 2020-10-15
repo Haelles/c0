@@ -25,7 +25,7 @@ public class Tokenizer {
         skipSpaceCharacters();
 
         if (it.isEOF()) {
-            return new Token(TokenType.EOF, null, it.currentPos(), it.currentPos());
+            return new Token(TokenType.EOF, "", it.currentPos(), it.currentPos());
         }
 
         char peek = it.peekChar();
@@ -45,6 +45,8 @@ public class Tokenizer {
         //
         // 解析存储的字符串为无符号整数
         // 解析成功则返回无符号整数类型的token，否则返回编译错误
+        //
+        // Token 的 Value 应填写数字的值
         throw new Error("Not implemented");
     }
 
@@ -56,13 +58,15 @@ public class Tokenizer {
         // 尝试将存储的字符串解释为关键字
         // -- 如果是关键字，则返回关键字类型的 token
         // -- 否则，返回标识符
+        //
+        // Token 的 Value 应填写标识符或关键字的字符串
         throw new Error("Not implemented");
     }
 
     private Token lexOperatorOrUnknown() throws TokenizeError {
         switch (it.nextChar()) {
             case '+':
-                return new Token(TokenType.Plus, null, it.previousPos(), it.currentPos());
+                return new Token(TokenType.Plus, '+', it.previousPos(), it.currentPos());
 
             case '-':
                 // 填入返回语句

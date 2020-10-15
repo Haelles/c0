@@ -11,14 +11,6 @@ public class Token {
     private Pos startPos;
     private Pos endPos;
 
-    public Token(TokenType tokenType, Object value, Integer startLine, Integer startColumn, Integer endLine,
-            Integer endColumn) {
-        this.tokenType = tokenType;
-        this.value = value;
-        this.startPos = new Pos(startLine, startColumn);
-        this.endPos = new Pos(endLine, endColumn);
-    }
-
     public Token(TokenType tokenType, Object value, Pos startPos, Pos endPos) {
         this.tokenType = tokenType;
         this.value = value;

@@ -6,12 +6,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import miniplc0java.analyser.Analyser;
 import miniplc0java.error.CompileError;
 import miniplc0java.instruction.Instruction;
 import miniplc0java.tokenizer.StringIter;
+import miniplc0java.tokenizer.Token;
 import miniplc0java.tokenizer.TokenType;
 import miniplc0java.tokenizer.Tokenizer;
 
@@ -71,17 +74,34 @@ public class App {
 
         if (result.getBoolean("tokenize")) {
             // tokenize
-            while (true) {
-                var token = tokenizer.nextToken();
-                if (token.getTokenType().equals(TokenType.EOF)) {
-                    break;
+            var tokens = new ArrayList<Token>();
+            try {
+                while (true) {
+                    var token = tokenizer.nextToken();
+                    if (token.getTokenType().equals(TokenType.EOF)) {
+                        break;
+                    }
+                    tokens.add(token);
                 }
+            } catch (Exception e) {
+                // 遇到错误不输出，直接退出
+                System.exit(0);
+                return;
+            }
+            for (Token token : tokens) {
                 output.println(token.toString());
             }
         } else if (result.getBoolean("analyse")) {
             // analyze
             var analyzer = new Analyser(tokenizer);
-            var instructions = analyzer.analyse();
+            List<Instruction> instructions;
+            try {
+                instructions = analyzer.analyse();
+            } catch (Exception e) {
+                // 遇到错误不输出，直接退出
+                System.exit(0);
+                return;
+            }
             for (Instruction instruction : instructions) {
                 output.println(instruction.toString());
             }
