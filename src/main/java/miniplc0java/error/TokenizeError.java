@@ -28,4 +28,9 @@ public class TokenizeError extends CompileError {
     public Pos getPos() {
         return pos;
     }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().append("Tokenize Error: ").append(err).append(", at: ").append(pos).toString();
+    }
 }

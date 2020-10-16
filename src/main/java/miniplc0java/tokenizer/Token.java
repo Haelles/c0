@@ -89,4 +89,9 @@ public class Token {
         sb.append("Value: ").append(this.value);
         return sb.toString();
     }
+
+    public String toStringAlt() {
+        return new StringBuilder().append("Token(").append(this.tokenType).append(", value: ").append(value)
+                .append("at: ").append(this.startPos).toString();
+    }
 }
