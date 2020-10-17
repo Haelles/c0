@@ -15,6 +15,8 @@ public class StringIter {
 
     Scanner scanner;
     // 指向下一个要读取的字符
+    Pos ptrNext = new Pos(0, 0);
+
     Pos ptr = new Pos(0, 0);
 
     boolean initialized = false;
@@ -96,9 +98,12 @@ public class StringIter {
         if (this.peeked.isPresent()) {
             char ch = this.peeked.get();
             this.peeked = Optional.empty();
+            this.ptr = ptrNext;
             return ch;
         } else {
-            return this.getNextChar();
+            char ch = this.getNextChar();
+            this.ptr = ptrNext;
+            return ch;
         }
     }
 
@@ -106,8 +111,8 @@ public class StringIter {
         if (isEOF()) {
             return 0;
         }
-        char result = linesBuffer.get(ptr.row).charAt(ptr.col);
-        ptr = nextPos();
+        char result = linesBuffer.get(ptrNext.row).charAt(ptrNext.col);
+        ptrNext = nextPos();
         return result;
     }
 
