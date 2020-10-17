@@ -64,7 +64,7 @@ public class StringIter {
             throw new Error("advance after EOF");
         }
         if (ptr.col == linesBuffer.get(ptr.row).length() - 1) {
-            return new Pos(ptr.col + 1, 0);
+            return new Pos(ptr.row + 1, 0);
         }
         return new Pos(ptr.row, ptr.col + 1);
     }
@@ -93,7 +93,7 @@ public class StringIter {
      * 将指针指向下一个字符，并返回当前字符
      */
     public char nextChar() {
-        if (this.peeked != null) {
+        if (this.peeked.isPresent()) {
             char ch = this.peeked.get();
             this.peeked = Optional.empty();
             return ch;
