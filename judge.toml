@@ -1,5 +1,5 @@
 [jobs.miniplc0]
-build = {source = "dockerfile", path = "."}
+image = {source = "dockerfile", path = ".", tag = "miniplc0-java"}
 run = [
   "java -jar build/libs/miniplc0java.jar -l $input -o $output",
 ]
