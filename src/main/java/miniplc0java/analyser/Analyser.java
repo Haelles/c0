@@ -383,9 +383,9 @@ public final class Analyser {
 
             // 生成代码
             if (op.getTokenType() == TokenType.Plus) {
-                instructions.add(new Instruction(Operation.ADD));
+                instructions.add(new Instruction(Operation.MUL));
             } else if (op.getTokenType() == TokenType.Minus) {
-                instructions.add(new Instruction(Operation.SUB));
+                instructions.add(new Instruction(Operation.DIV));
             }
         }
     }
