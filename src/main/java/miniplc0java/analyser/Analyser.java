@@ -187,10 +187,8 @@ public final class Analyser {
         }
     }
 
-    /**
-     * <程序> ::= 'begin'<主过程>'end'
-     */
     private void analyseProgram() throws CompileError {
+        // 程序 -> 'begin' 主过程 'end'
         // 示例函数，示例如何调用子程序
         // 'begin'
         expect(TokenType.Begin);
@@ -203,6 +201,7 @@ public final class Analyser {
     }
 
     private void analyseMain() throws CompileError {
+        // 主过程 -> 常量声明 变量声明 语句序列
         throw new Error("Not implemented");
     }
 
@@ -382,9 +381,9 @@ public final class Analyser {
             // 因子
 
             // 生成代码
-            if (op.getTokenType() == TokenType.Plus) {
+            if (op.getTokenType() == TokenType.Mult) {
                 instructions.add(new Instruction(Operation.MUL));
-            } else if (op.getTokenType() == TokenType.Minus) {
+            } else if (op.getTokenType() == TokenType.Div) {
                 instructions.add(new Instruction(Operation.DIV));
             }
         }
