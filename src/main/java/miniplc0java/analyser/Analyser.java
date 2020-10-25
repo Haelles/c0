@@ -238,7 +238,6 @@ public final class Analyser {
     }
 
     private void analyseVariableDeclaration() throws CompileError {
-        // 示例函数，示例如何解析常量声明
         // 变量声明 -> 变量声明语句*
 
         // 如果下一个 token 是 var 就继续
