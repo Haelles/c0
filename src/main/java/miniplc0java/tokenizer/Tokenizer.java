@@ -4,6 +4,7 @@ import miniplc0java.error.TokenizeError;
 import miniplc0java.error.ErrorCode;
 import miniplc0java.util.Pos;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Tokenizer {
 
@@ -51,12 +52,12 @@ public class Tokenizer {
         // Token 的 Value 应填写数字的值
         Pos startPos = it.currentPos();
         try{
-            ArrayList<Character> temp = new ArrayList<>();
-            temp.add(it.nextChar());
+            StringBuilder temp = new StringBuilder();
+            temp.append(it.nextChar());
             do{
                 char ch = it.peekChar();
                 if(Character.isDigit(ch)){
-                    temp.add(ch);
+                    temp.append(ch);
                     it.nextChar();
                 }
                 else break;
@@ -79,12 +80,12 @@ public class Tokenizer {
         // Token 的 Value 应填写标识符或关键字的字符串
         Pos startPos = it.currentPos();
         try{
-            ArrayList<Character> temp = new ArrayList<>();
-            temp.add(it.nextChar());
+            StringBuilder temp = new StringBuilder();
+            temp.append(it.nextChar());
             do{
                 char ch = it.peekChar();
                 if(Character.isDigit(ch) || Character.isAlphabetic(ch)){
-                    temp.add(ch);
+                    temp.append(ch);
                     it.nextChar();
                 }
                 else break;
