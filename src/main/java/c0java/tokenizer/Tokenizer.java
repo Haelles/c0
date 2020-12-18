@@ -1,8 +1,8 @@
-package miniplc0java.tokenizer;
+package c0java.tokenizer;
 
-import miniplc0java.error.TokenizeError;
-import miniplc0java.error.ErrorCode;
-import miniplc0java.util.Pos;
+import c0java.error.TokenizeError;
+import c0java.error.ErrorCode;
+import c0java.util.Pos;
 import org.checkerframework.checker.units.qual.C;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class Tokenizer {
         this.peek = 0;
         this.cur = 0;
     }
-    
+
     public Token nextToken() throws TokenizeError {
         it.readAll();
 
@@ -165,8 +165,10 @@ public class Tokenizer {
                 return new Token(TokenType.PLUS, '+', startPos, it.nextPos());
 
             case '-':
-                if(peek == '>')
+                if(peek == '>'){
+                    stepCurPeek();
                     return new Token(TokenType.ARROW, "->", startPos, it.nextPos());
+                }
                 return new Token(TokenType.MINUS, '-', startPos, it.nextPos());
 
             case '*':
@@ -179,24 +181,30 @@ public class Tokenizer {
                 return new Token(TokenType.DIV, '/', startPos, it.nextPos());
 
             case '=':
-                if(peek == '=')
+                if(peek == '='){
+                    stepCurPeek();
                     return new Token(TokenType.EQ, "==", startPos, it.nextPos());
+                }
                 return new Token(TokenType.ASSIGN, '=', startPos, it.nextPos());
 
             case '!':
                 if(peek != '=')
                     throw new TokenizeError(ErrorCode.InvalidInput, startPos);
-                else return new Token(TokenType.ASSIGN, "!=", startPos, it.nextPos());
+                else return new Token(TokenType.NEQ, "!=", startPos, it.nextPos());
 
             case '<':
-                if(peek == '=')
+                if(peek == '='){
+                    stepCurPeek();
                     return new Token(TokenType.LE, "<=", startPos, it.nextPos());
-                else return new Token(TokenType.LT, '=', startPos, it.nextPos());
+                }
+                else return new Token(TokenType.LT, '<', startPos, it.nextPos());
 
             case '>':
-                if(peek == '=')
+                if(peek == '='){
+                    stepCurPeek();
                     return new Token(TokenType.GE, ">=", startPos, it.nextPos());
-                else return new Token(TokenType.GT, '=', startPos, it.nextPos());
+                }
+                else return new Token(TokenType.GT, '>', startPos, it.nextPos());
 
             case '(':
                 return new Token(TokenType.L_PAREN, '(', startPos, it.nextPos());
@@ -211,10 +219,10 @@ public class Tokenizer {
                 return new Token(TokenType.R_BRACE, '}', startPos, it.nextPos());
 
             case ',':
-                return new Token(TokenType.COMMA, ';', startPos, it.nextPos());
+                return new Token(TokenType.COMMA, ',', startPos, it.nextPos());
 
             case ':':
-                return new Token(TokenType.COLON, ';', startPos, it.nextPos());
+                return new Token(TokenType.COLON, ':', startPos, it.nextPos());
 
             case ';':
                 return new Token(TokenType.SEMICOLON, ';', startPos, it.nextPos());

@@ -1,4 +1,4 @@
-package miniplc0java;
+package c0java;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import miniplc0java.analyser.Analyser;
-import miniplc0java.error.CompileError;
-import miniplc0java.instruction.Instruction;
-import miniplc0java.tokenizer.StringIter;
-import miniplc0java.tokenizer.Token;
-import miniplc0java.tokenizer.TokenType;
-import miniplc0java.tokenizer.Tokenizer;
+import c0java.analyser.Analyser;
+import c0java.error.CompileError;
+import c0java.instruction.Instruction;
+import c0java.tokenizer.StringIter;
+import c0java.tokenizer.Token;
+import c0java.tokenizer.TokenType;
+import c0java.tokenizer.Tokenizer;
 
 import net.sourceforge.argparse4j.*;
 import net.sourceforge.argparse4j.impl.Arguments;
@@ -114,7 +114,7 @@ public class App {
     }
 
     private static ArgumentParser buildArgparse() {
-        var builder = ArgumentParsers.newFor("miniplc0-java");
+        var builder = ArgumentParsers.newFor("c0-java");
         var parser = builder.build();
         parser.addArgument("-t", "--tokenize").help("Tokenize the input").action(Arguments.storeTrue());
         parser.addArgument("-l", "--analyse").help("Analyze the input").action(Arguments.storeTrue());

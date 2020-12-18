@@ -1,4 +1,4 @@
-package miniplc0java.instruction;
+package c0java.instruction;
 
 public enum Operation {
     ILL, LIT, LOD, STO, ADD, SUB, MUL, DIV, WRT

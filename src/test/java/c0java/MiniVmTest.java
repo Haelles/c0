@@ -1,4 +1,4 @@
-package miniplc0java;
+package c0java;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,9 +9,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import miniplc0java.instruction.Instruction;
-import miniplc0java.instruction.Operation;
-import miniplc0java.vm.MiniVm;
+import c0java.instruction.Instruction;
+import c0java.instruction.Operation;
+import c0java.vm.MiniVm;
 
 public class MiniVmTest {
 

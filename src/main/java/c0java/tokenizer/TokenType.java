@@ -1,4 +1,4 @@
-package miniplc0java.tokenizer;
+package c0java.tokenizer;
 
 public enum TokenType {
     // 关键字

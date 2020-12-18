@@ -1,10 +1,10 @@
-package miniplc0java.vm;
+package c0java.vm;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import miniplc0java.instruction.Instruction;
+import c0java.instruction.Instruction;
 
 public class MiniVm {
     private List<Instruction> instructions;
