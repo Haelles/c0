@@ -49,6 +49,9 @@ public enum TokenType {
     // 注释，这是扩展c0内容
     COMMENT, // -> '//' regex(.*) '\n'
 
+    // int, void, double
+    TY,
+
     // 额外添加，文件尾
     EOF;
 
@@ -130,6 +133,8 @@ public enum TokenType {
                 return "Colon";
             case COMMENT:
                 return "Comment";
+            case TY:
+                return "Type";
             case EOF:
                 return "EOF";
             default:

@@ -13,10 +13,7 @@ import java.util.Scanner;
 import c0java.analyser.Analyser;
 import c0java.error.CompileError;
 import c0java.instruction.Instruction;
-import c0java.tokenizer.StringIter;
-import c0java.tokenizer.Token;
-import c0java.tokenizer.TokenType;
-import c0java.tokenizer.Tokenizer;
+import c0java.tokenizer.*;
 
 import net.sourceforge.argparse4j.*;
 import net.sourceforge.argparse4j.impl.Arguments;
@@ -67,22 +64,17 @@ public class App {
             }
         }
 
+        // 从这里对main进行修改
         Scanner scanner;
         scanner = new Scanner(input);
         var iter = new StringIter(scanner);
-        var tokenizer = tokenize(iter);
+        Tokenizer tokenizer = new Tokenizer(iter);
 
         if (result.getBoolean("tokenize")) {
             // tokenize
-            var tokens = new ArrayList<Token>();
+            ArrayList<Token> tokens;
             try {
-                while (true) {
-                    var token = tokenizer.nextToken();
-                    if (token.getTokenType().equals(TokenType.EOF)) {
-                        break;
-                    }
-                    tokens.add(token);
-                }
+                tokens = tokenizer.generateTokens();
             } catch (Exception e) {
                 // 遇到错误不输出，直接退出
                 System.err.println(e);
@@ -94,19 +86,19 @@ public class App {
             }
         } else if (result.getBoolean("analyse")) {
             // analyze
-            var analyzer = new Analyser(tokenizer);
-            List<Instruction> instructions;
-            try {
-                instructions = analyzer.analyse();
-            } catch (Exception e) {
-                // 遇到错误不输出，直接退出
-                System.err.println(e);
-                System.exit(0);
-                return;
-            }
-            for (Instruction instruction : instructions) {
-                output.println(instruction.toString());
-            }
+//            var analyzer = new Analyser(tokenizer);
+//            List<Instruction> instructions;
+//            try {
+//                instructions = analyzer.analyse();
+//            } catch (Exception e) {
+//                // 遇到错误不输出，直接退出
+//                System.err.println(e);
+//                System.exit(-1);
+//                return;
+//            }
+//            for (Instruction instruction : instructions) {
+//                output.println(instruction.toString());
+//            }
         } else {
             System.err.println("Please specify either '--analyse' or '--tokenize'.");
             System.exit(3);
@@ -124,8 +116,8 @@ public class App {
         return parser;
     }
 
-    private static Tokenizer tokenize(StringIter iter) {
-        var tokenizer = new Tokenizer(iter);
-        return tokenizer;
-    }
+//    private static Tokenizer tokenize(StringIter iter) {
+//        var tokenizer = new Tokenizer(iter);
+//        return tokenizer;
+//    }
 }

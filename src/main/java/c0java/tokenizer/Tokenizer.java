@@ -7,6 +7,7 @@ import org.checkerframework.checker.units.qual.C;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class Tokenizer {
 
@@ -15,14 +16,69 @@ public class Tokenizer {
     private char peek;
     private char cur;
 
+    private int tokenLength;
+    private int currentPos; // 记录读取到哪个token
+    private ArrayList<Token> tokens = new ArrayList<>();
+
     public Tokenizer(StringIter it) {
         this.it = it;
         this.buffer = new StringBuilder();
         this.peek = 0;
         this.cur = 0;
+        this.tokenLength = 0;
+        this.currentPos = 0;
     }
 
-    public Token nextToken() throws TokenizeError {
+    public boolean hasNext(){
+        return currentPos <= tokenLength;
+    }
+
+    public int getTokenLength(){
+        return tokenLength;
+    }
+
+    public ArrayList<Token> getTokens(){
+        return tokens;
+    }
+
+    public Token getNextToken(){
+        currentPos += 1;
+        return tokens.get(currentPos - 1);
+    }
+
+    public Token peekNextToken(){
+        return getToken(currentPos);
+    }
+
+    public Token getToken(int i){
+        return tokens.get(i);
+    }
+
+    public void removeToken(int i){
+        tokens.remove(i);
+        tokenLength -= 1;
+    }
+
+    public ArrayList<Token> generateTokens() throws TokenizeError {
+        while (true) {
+            var token = nextToken();
+            if (token.getTokenType().equals(TokenType.EOF)) {
+                break;
+            }
+            addToken(token);
+        }
+        return tokens;
+    }
+
+    /**
+     * 以下函数均被封装，外部不会调用
+     */
+    private void addToken(Token token){
+        tokens.add(token);
+        tokenLength += 1;
+    }
+
+    private Token nextToken() throws TokenizeError {
         it.readAll();
 
         // 跳过之前的所有空白字符
@@ -152,6 +208,9 @@ public class Tokenizer {
             // 扩展c0
             case "break" -> TokenType.BREAK_KW;
             case "continue" -> TokenType.CONTINUE_KW;
+            // int void double
+            case "int", "void", "double" -> TokenType.TY;
+
             default -> TokenType.IDENT;
         };
         return new Token(tokenType, buffer.toString(), startPos, it.currentPos());

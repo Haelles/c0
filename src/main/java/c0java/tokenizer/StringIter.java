@@ -53,8 +53,7 @@ public class StringIter {
     // | h | a | 1 | 9 | 2 | 6 | 0 | 8 | 1 | \n |（缓冲区第0行）
     // | 7 | 1 | 1 | 4 | 5 | 1 | 4 | （缓冲区第1行）
     // 这里假设指针指向第一行的 \n，那么有
-    // nextPos() = (1, 0)
-    // currentPos() = (0, 9)
+    // currentPos() == nextPos() = (1, 0)
     // previousPos() = (0, 8)
     // nextChar() = '\n' 并且指针移动到 (1, 0)
     // peekChar() = '\n' 并且指针不移动
