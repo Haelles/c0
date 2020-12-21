@@ -7,6 +7,7 @@ public class AnalyzeError extends CompileError {
 
     ErrorCode code;
     Pos pos;
+    String message;
 
     @Override
     public ErrorCode getErr() {
@@ -19,17 +20,19 @@ public class AnalyzeError extends CompileError {
     }
 
     /**
-     * @param errorToken
+     *
      * @param code
      * @param pos
      */
-    public AnalyzeError(ErrorCode code, Pos pos) {
+    public AnalyzeError(ErrorCode code, Pos pos, String message) {
         this.code = code;
         this.pos = pos;
+        this.message = message;
     }
 
     @Override
     public String toString() {
-        return new StringBuilder().append("Analyze Error: ").append(code).append(", at: ").append(pos).toString();
+        return new StringBuilder().append("Analyze Error: ").append(code).append(", message:").append(message).append("," +
+                " at: ").append(pos).toString();
     }
 }

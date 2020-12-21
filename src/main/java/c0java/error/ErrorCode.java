@@ -18,5 +18,8 @@ public enum ErrorCode {
     NotInitialized,
     InvalidAssignment,
     InvalidPrint,
-    ExpectedToken
+    ExpectedToken,
+    DuplicateDeclare,
+    InvalidVariableType,
+    InvalidReturnTYpe
 }

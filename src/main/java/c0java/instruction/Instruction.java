@@ -5,6 +5,7 @@ import java.util.Objects;
 public class Instruction {
     private Operation opt;
     Integer x;
+    Integer recordBreak = 0; //
 
     public Instruction(Operation opt) {
         this.opt = opt;
@@ -16,9 +17,10 @@ public class Instruction {
         this.x = x;
     }
 
-    public Instruction() {
-        this.opt = Operation.LIT;
-        this.x = 0;
+    public Instruction(Operation opt, Integer x, Integer recordBreak) {
+        this.opt = opt;
+        this.x = x;
+        this.recordBreak = recordBreak;
     }
 
     @Override
@@ -46,6 +48,10 @@ public class Instruction {
 
     public Integer getX() {
         return x;
+    }
+
+    public Integer getRecordBreak(){
+        return recordBreak;
     }
 
     public void setX(Integer x) {

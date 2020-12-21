@@ -46,6 +46,10 @@ public class Tokenizer {
         return tokens.get(currentPos - 1);
     }
 
+    public Token getCurrentToken(){ // 再次获得上一个token，它已经被读完
+        return tokens.get(currentPos - 1);
+    }
+
     public Token peekNextToken(){
         return getToken(currentPos);
     }
@@ -65,7 +69,8 @@ public class Tokenizer {
             if (token.getTokenType().equals(TokenType.EOF)) {
                 break;
             }
-            addToken(token);
+            if(token.getTokenType() != TokenType.COMMENT)
+                addToken(token);
         }
         return tokens;
     }

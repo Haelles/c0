@@ -15,9 +15,18 @@ public class SymbolTable {
 
     public void addSymbol(Symbol symbol){
         symbolList.add(symbol);
+        symbol.setAddress(symbolList.size() - 1);
     }
 
     public int getSymbolLength(){
         return symbolList.size();
+    }
+
+    public boolean isDeclared(String symbolName){
+        for(Symbol symbol : symbolList){
+            if (symbol.getName().equals(symbolName))
+                return true;
+        }
+        return false;
     }
 }
