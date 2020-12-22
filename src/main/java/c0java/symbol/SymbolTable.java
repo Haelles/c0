@@ -29,4 +29,8 @@ public class SymbolTable {
         }
         return false;
     }
+
+    public Symbol getSymbol(int i){
+        return symbolList.get(i);
+    }
 }

@@ -52,6 +52,9 @@ public enum TokenType {
     // int, void, double
     TY,
 
+    // 额外添加 用来标识边界的'#'
+    SHARP,
+
     // 额外添加，文件尾
     EOF;
 

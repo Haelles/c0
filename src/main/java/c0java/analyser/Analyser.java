@@ -3,14 +3,12 @@ package c0java.analyser;
 import c0java.error.*;
 import c0java.instruction.Instruction;
 import c0java.instruction.Operation;
-import c0java.symbol.Symbol;
-import c0java.symbol.SymbolTable;
-import c0java.symbol.SymbolType;
-import c0java.symbol.ValueType;
+import c0java.symbol.*;
 import c0java.symbol.func.Function;
 import c0java.symbol.variable.Variable;
 import c0java.tokenizer.Token;
 import c0java.tokenizer.TokenType;
+import c0java.tokenizer.TokenTypeStack;
 import c0java.tokenizer.Tokenizer;
 
 import java.util.*;
@@ -116,13 +114,14 @@ public final class Analyser {
     //item -> function | decl_stmt
     private void analyseProgram() throws CompileError {
         Token peek;
+        Function _start = (Function) symbolTableStack.get(1).getSymbol(0); // 获得_start
         while (tokenizer.hasNext()) {
             peek = tokenizer.peekNextToken();
             TokenType tokenType = peek.getTokenType();
             if (tokenType == TokenType.FN_KW)
                 analyseFunc();
-            else if (tokenType == TokenType.LET_KW || t == TokenType.CONST_KW)
-                analyseDeclareStmt();
+            else if (tokenType == TokenType.LET_KW || tokenType == TokenType.CONST_KW)
+                analyseDeclStmt(_start);
             else if (tokenType == TokenType.EOF) {
                 break;
             } else {
@@ -255,7 +254,7 @@ public final class Analyser {
         } else if(tokenType == TokenType.SEMICOLON){
             analyseEmptyStmt(function);
         } else if(inFirstSetOfExprStmt(tokenType))
-            analyseExpr();
+            analyseExpr(function);
         else throw new AnalyzeError(ErrorCode.ExpectedToken,
                 tokenizer.getCurrentToken().getStartPos(), "需要合适的token类型来进入expr");
     }
@@ -312,7 +311,7 @@ public final class Analyser {
             if(isGlobal)
                 function.addInstruction(new Instruction(Operation.GLOBA, variable.getAddress()));
             else function.addInstruction(new Instruction(Operation.LOCA, variable.getAddress()));
-            ValueType exprReturnType = analyseExpr();
+            ValueType exprReturnType = analyseExpr(function);
             if(variable.getValueType() != exprReturnType)
                 throw new AnalyzeError(ErrorCode.InvalidVariableType,
                         tokenizer.getCurrentToken().getStartPos(), "expr表达式返回类型不合预期");
@@ -327,7 +326,7 @@ public final class Analyser {
     private void analyseIfStmt(Function function, int inWhile) throws CompileError {
         // if_stmt -> 'if' expr block_stmt ('else' 'if' expr block_stmt)* ('else' block_stmt)?
         next(); // 去掉检测过的if
-        if(analyseExpr() == ValueType.VOID)
+        if(analyseExpr(function) == ValueType.VOID)
             throw new AnalyzeError(ErrorCode.InvalidReturnTYpe,
                     tokenizer.getCurrentToken().getStartPos(), "expr表达式返回类型不合预期");
 
@@ -364,7 +363,7 @@ public final class Analyser {
         // 根据助教代码，br0指令作为while部分的开端
         int br0 = function.addInstruction(new Instruction(Operation.BR, 0));
 
-        ValueType valueType = analyseExpr();
+        ValueType valueType = analyseExpr(function);
         if(valueType != ValueType.INT)
             throw new AnalyzeError(ErrorCode.InvalidReturnTYpe,
                     tokenizer.getCurrentToken().getStartPos(), "expr表达式返回类型不合预期");
@@ -419,7 +418,7 @@ public final class Analyser {
         if(valueType == ValueType.VOID && peek.getTokenType() != TokenType.SEMICOLON)
             throw new AnalyzeError(ErrorCode.ExpectedToken,
                     tokenizer.getCurrentToken().getStartPos(), "函数为void类型，下一个token应该是分号");
-        if(function.getReturnValueType() != analyseExpr())
+        if(function.getReturnValueType() != analyseExpr(function))
             throw new AnalyzeError(ErrorCode.ExpectedToken,
                     tokenizer.getCurrentToken().getStartPos(), "需要合适的token类型来进入expr");
         if(function.getReturnValueType() != ValueType.VOID)
@@ -446,8 +445,81 @@ public final class Analyser {
     }
 
     // TODO
-    private ValueType analyseExpr(){
-        return ValueType.INT;
+    private ValueType analyseExpr(Function function) throws CompileError {
+        TokenTypeStack operatorStack = new TokenTypeStack();
+        ValueTypeStack typeStack = new ValueTypeStack();
+
+        operatorStack.push(TokenType.SHARP);
+
+        if(!inFirstSetOfExprStmt(peek().getTokenType()))
+            return ValueType.VOID;
+
+        while (tokenizer.hasNext() && inFirstSetOfExprStmt(peek().getTokenType())){
+            Token peek = peek();
+            TokenType peekTokenType = peek().getTokenType();
+            if(peek.getTokenType() == TokenType.L_PAREN){
+                if(operatorStack.getTop() <= typeStack.getTop()){
+                    throw new AnalyzeError(ErrorCode.InvalidStructure, peek.getStartPos(), "两个表达式不能相邻");
+                }
+                typeStack.push(analyseGroupExpr(function));
+            }
+            else if(peekTokenType == TokenType.IDENT){
+                if(operatorStack.getTop() <= typeStack.getTop()){
+                    throw new AnalyzeError(ErrorCode.InvalidStructure, peek.getStartPos(), "两个表达式不能相邻");
+                }
+                next();
+                // 注意这里移位了，不能再用上面定义的peek
+                if(tokenizer.hasNext() && peek().getTokenType() == TokenType.L_PAREN){
+                    tokenizer.moveToForward();
+                    typeStack.push(analyseCallExpr(function));
+                }
+                else if(tokenizer.hasNext() && peek().getTokenType() == TokenType.ASSIGN){
+                    tokenizer.moveToForward();
+                    typeStack.push(analyseAssignExpr(function));
+                }
+                else{
+                    tokenizer.moveToForward();
+                    typeStack.push(analyseAssignExpr(function));
+                }
+            }
+            else if(peekTokenType == TokenType.UINT_LITERAL){
+                if(operatorStack.getTop() <= typeStack.getTop()){
+                    throw new AnalyzeError(ErrorCode.InvalidStructure, peek.getStartPos(), "两个表达式不能相邻");
+                }
+                typeStack.push(analyseLiteralExpr(function));
+            }
+            else if(peekTokenType == TokenType.MINUS && operatorStack.getTop() > typeStack.getTop()){
+                typeStack.push(analyseNegateExpr(function));
+            }
+            else if(peekTokenType == TokenType.AS_KW){
+                next();
+                TokenType tokenType = expect(TokenType.TY).getTokenType();
+                // TODO
+            }
+
+        }
+
+
+
     }
 
+    private ValueType analyseGroupExpr(Function function){
+        return ValueType.VOID;
+    }
+
+    private ValueType analyseCallExpr(Function function){
+        return ValueType.VOID;
+    }
+
+    private ValueType analyseAssignExpr(Function function){
+        return ValueType.VOID;
+    }
+
+    private ValueType analyseLiteralExpr(Function function){
+        return ValueType.VOID;
+    }
+
+    private ValueType analyseNegateExpr(Function function){
+        return ValueType.VOID;
+    }
 }

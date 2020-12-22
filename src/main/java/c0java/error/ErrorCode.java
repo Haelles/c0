@@ -21,5 +21,7 @@ public enum ErrorCode {
     ExpectedToken,
     DuplicateDeclare,
     InvalidVariableType,
-    InvalidReturnTYpe
+    InvalidReturnTYpe,
+    InvalidStructure,
+    IndexOutOfBound
 }

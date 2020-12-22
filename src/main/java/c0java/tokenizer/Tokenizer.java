@@ -1,5 +1,6 @@
 package c0java.tokenizer;
 
+import c0java.error.AnalyzeError;
 import c0java.error.TokenizeError;
 import c0java.error.ErrorCode;
 import c0java.util.Pos;
@@ -30,7 +31,7 @@ public class Tokenizer {
     }
 
     public boolean hasNext(){
-        return currentPos <= tokenLength;
+        return currentPos < tokenLength;
     }
 
     public int getTokenLength(){
@@ -56,6 +57,13 @@ public class Tokenizer {
 
     public Token getToken(int i){
         return tokens.get(i);
+    }
+
+    public Token moveToForward() throws AnalyzeError {
+        currentPos -= 1;
+        if(currentPos < 0)
+            throw new AnalyzeError(ErrorCode.IndexOutOfBound, new Pos(0, 0), "token下标最小值为0");
+        return getToken(currentPos);
     }
 
     public void removeToken(int i){
