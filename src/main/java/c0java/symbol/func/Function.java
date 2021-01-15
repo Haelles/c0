@@ -105,4 +105,7 @@ public class Function extends Symbol {
         return localSlots++;
     }
 
+    public ArrayList<ValueType> getParamValueTypeList() {
+        return paramValueTypeList;
+    }
 }

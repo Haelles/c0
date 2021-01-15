@@ -5,6 +5,8 @@ import java.util.Objects;
 public class Instruction {
     private Operation opt;
     Integer x;
+    Long x1;
+    Double x2;
     Integer recordBreak = 0; //
 
     public Instruction(Operation opt) {
@@ -15,6 +17,16 @@ public class Instruction {
     public Instruction(Operation opt, Integer x) {
         this.opt = opt;
         this.x = x;
+    }
+
+    public Instruction(Operation opt, Long x) {
+        this.opt = opt;
+        this.x1 = x;
+    }
+
+    public Instruction(Operation opt, Double x) {
+        this.opt = opt;
+        this.x2 = x;
     }
 
     public Instruction(Operation opt, Integer x, Integer recordBreak) {

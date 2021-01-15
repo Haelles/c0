@@ -58,5 +58,7 @@ public class Variable extends Symbol {
         return valueType;
     }
 
-
+    public boolean isConst() {
+        return isConst;
+    }
 }

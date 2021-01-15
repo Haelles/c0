@@ -2,12 +2,13 @@ package c0java.symbol;
 
 import c0java.error.AnalyzeError;
 import c0java.error.ErrorCode;
+import c0java.symbol.func.Function;
 import c0java.util.Pos;
 
 import java.util.ArrayList;
 
 public class SymbolTable {
-    private ArrayList<Symbol> symbolList;
+    protected ArrayList<Symbol> symbolList;
 
     public SymbolTable(){
         this.symbolList = new ArrayList<>();
@@ -22,6 +23,14 @@ public class SymbolTable {
             throw new AnalyzeError(ErrorCode.DuplicateDeclaration, pos, symbol.getName() + "已经被声明");
         }
         symbolList.add(symbol);
+    }
+
+    public Symbol searchSymbol(String name, Pos pos) throws AnalyzeError {
+        for (Symbol symbol : symbolList) {
+            if (symbol.getName().equals(name))
+                return symbol;
+        }
+        throw new AnalyzeError(ErrorCode.VariableNotDecl, pos, "查找不到这个符号");
     }
 
     public int getSymbolLength(){

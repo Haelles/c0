@@ -24,5 +24,10 @@ public enum ErrorCode {
     InvalidReturnTYpe,
     InvalidStructure,
     IndexOutOfBound,
-    TypeNotMatch
+    TypeNotMatch,
+    VariableNotDecl,
+    ConstValueChanged,
+    InvalidAssign,
+    ParamNotEnough,
+    InvalidCallList
 }

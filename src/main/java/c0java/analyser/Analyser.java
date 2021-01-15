@@ -93,6 +93,10 @@ public final class Analyser {
             throw new ExpectedTokenError(tt, token);
         }
     }
+    
+    public Token currentToken(){
+        return tokenizer.getCurrentToken();
+    }
 
 
     public List<Instruction> analyse() throws CompileError {
@@ -188,20 +192,22 @@ public final class Analyser {
         SymbolTable localTable = new SymbolTable();
         // 先加入参数到变量表中
         for(Symbol param : params){
-            localTable.addSymbol(param, tokenizer.getCurrentToken().getStartPos());
+            localTable.addSymbol(param, currentToken().getStartPos());
         }
         function.setAddress(funcTable.getNextFid()); // 第几个函数
 
         symbolTableStack.push(localTable);
         analyseBlockStmt(function, -1); // 用-1表示不在while中
+        symbolTableStack.pop();
 
         // 函数名添加到全局变量表;函数合法，添加到函数表
         Variable fn_name = new Variable(funcName, SymbolType.GLOBAL, ValueType.STRING);
         fn_name.setLength(funcName.length());
         fn_name.setAddress(globalTable.getSymbolLength());
+        globalTable.addSymbol(fn_name, currentToken().getStartPos());
         funcNameAndStringMap.put(fn_name.getAddress(), funcName);
         function.setFname(fn_name.getAddress());
-        funcTable.addSymbol(function, tokenizer.getCurrentToken().getStartPos());
+        funcTable.addSymbol(function, currentToken().getStartPos());
 
 
         // 开始添加指令
@@ -287,7 +293,7 @@ public final class Analyser {
         } else if(inFirstSetOfExprStmt(tokenType))
             analyseExpr(function);
         else throw new AnalyzeError(ErrorCode.ExpectedToken,
-                tokenizer.getCurrentToken().getStartPos(), "需要合适的token类型来进入expr");
+                currentToken().getStartPos(), "需要合适的token类型来进入expr");
     }
 
 
@@ -351,12 +357,12 @@ public final class Analyser {
             ValueType exprReturnType = analyseExpr(function);
             if(variable.getValueType() != exprReturnType)
                 throw new AnalyzeError(ErrorCode.InvalidVariableType,
-                        tokenizer.getCurrentToken().getStartPos(), "expr表达式返回类型不合预期");
+                        currentToken().getStartPos(), "expr表达式返回类型不合预期");
             variable.setInitialized(true); // 有表达式，已经被初始化
             function.addInstruction(new Instruction(Operation.STORE_64));
         }
         else if(isConst){
-            throw new ExpectedTokenError(TokenType.ASSIGN, tokenizer.getCurrentToken());
+            throw new ExpectedTokenError(TokenType.ASSIGN, currentToken());
         }
         expect(TokenType.SEMICOLON);
     }
@@ -366,7 +372,7 @@ public final class Analyser {
         next(); // 去掉检测过的if
         if(analyseExpr(function) == ValueType.VOID)
             throw new AnalyzeError(ErrorCode.InvalidReturnTYpe,
-                    tokenizer.getCurrentToken().getStartPos(), "expr表达式返回类型不合预期");
+                    currentToken().getStartPos(), "expr表达式返回类型不合预期");
 
         int label1 = function.addInstruction(new Instruction(Operation.BR_FALSE, 0));
         SymbolTable symbolTable = new SymbolTable();
@@ -404,7 +410,7 @@ public final class Analyser {
         ValueType valueType = analyseExpr(function);
         if(valueType != ValueType.INT)
             throw new AnalyzeError(ErrorCode.InvalidReturnTYpe,
-                    tokenizer.getCurrentToken().getStartPos(), "expr表达式返回类型不合预期");
+                    currentToken().getStartPos(), "expr表达式返回类型不合预期");
 
         function.addInstruction(new Instruction(Operation.BR_TRUE, 1));
         int brForwardID = function.addInstruction(new Instruction(Operation.BR, 0));
@@ -430,7 +436,7 @@ public final class Analyser {
         // 首先检查是否在一个while块中
         if(inWhile == -1)
             throw new AnalyzeError(ErrorCode.InvalidInput,
-                    tokenizer.getCurrentToken().getStartPos(), "break只能用在while循环中");
+                    currentToken().getStartPos(), "break只能用在while循环中");
         next(); // 移走break
         expect(TokenType.SEMICOLON);
         // 等待被填写
@@ -441,7 +447,7 @@ public final class Analyser {
         // continue_stmt -> 'continue' ';'
         if(inWhile == -1)
             throw new AnalyzeError(ErrorCode.InvalidInput,
-                    tokenizer.getCurrentToken().getStartPos(), "continue只能用在while循环中");
+                    currentToken().getStartPos(), "continue只能用在while循环中");
         next(); // continue
         expect(TokenType.SEMICOLON);
         int id = function.addInstruction(new Instruction(Operation.BR, 0));
@@ -455,10 +461,10 @@ public final class Analyser {
         Token peek = peek();
         if(valueType == ValueType.VOID && peek.getTokenType() != TokenType.SEMICOLON)
             throw new AnalyzeError(ErrorCode.ExpectedToken,
-                    tokenizer.getCurrentToken().getStartPos(), "函数为void类型，下一个token应该是分号");
+                    currentToken().getStartPos(), "函数为void类型，下一个token应该是分号");
         if(function.getReturnValueType() != analyseExpr(function))
             throw new AnalyzeError(ErrorCode.ExpectedToken,
-                    tokenizer.getCurrentToken().getStartPos(), "需要合适的token类型来进入expr");
+                    currentToken().getStartPos(), "需要合适的token类型来进入expr");
         if(function.getReturnValueType() != ValueType.VOID)
             function.addInstruction(new Instruction(Operation.STORE_64));
         function.addInstruction(new Instruction(Operation.RET));
@@ -517,10 +523,10 @@ public final class Analyser {
                 }
                 else{
                     tokenizer.moveToForward();
-                    typeStack.push(analyseAssignExpr(function));
+                    typeStack.push(analyseIdentExpr(function));
                 }
             }
-            else if(peekTokenType == TokenType.UINT_LITERAL){
+            else if(peekTokenType == TokenType.UINT_LITERAL || peekTokenType == TokenType.DOUBLE_LITERAL || peekTokenType == TokenType.CHAR_LITERAL || peekTokenType == TokenType.STRING_LITERAL){
                 if(operatorStack.getTop() <= typeStack.getTop()){
                     throw new AnalyzeError(ErrorCode.InvalidStructure, peek.getStartPos(), "两个表达式不能相邻");
                 }
@@ -542,8 +548,7 @@ public final class Analyser {
                     typeStack.push(ValueType.DOUBLE);
                     function.addInstruction(new Instruction(Operation.ITOF));
                 }
-                else if (typeStack.getTopElement() == ValueType.DOUBLE && tokenType == TokenType.UINT_LITERAL)
-                {
+                else if (typeStack.getTopElement() == ValueType.DOUBLE && tokenType == TokenType.UINT_LITERAL){
                     typeStack.pop();
                     typeStack.push(ValueType.INT);
                     function.addInstruction(new Instruction(Operation.FTOI));
@@ -589,29 +594,247 @@ public final class Analyser {
         return typeStack.getElement(0);
     }
 
-    private ValueType analyseOperatorExpr(ValueType valueType, TokenType tokenType, Function function){
+    private ValueType analyseOperatorExpr(ValueType valueType, TokenType tokenType, Function function) throws AnalyzeError {
+        switch (tokenType) {
+            case PLUS -> {
+                addInstructionInOperatorExpr(valueType, function, Operation.ADD_I, Operation.ADD_F, "数据类型不对，不能相加");
+                return valueType;
+            }
+            case MINUS -> {
+                addInstructionInOperatorExpr(valueType, function, Operation.SUB_I, Operation.SUB_F, "数据类型不对，不能相减");
+                return valueType;
+            }
+            case MUL -> {
+                addInstructionInOperatorExpr(valueType, function, Operation.MUL_I, Operation.MUL_F, "数据类型不对，不能相乘");
+                return valueType;
+            }
+            case DIV -> {
+                addInstructionInOperatorExpr(valueType, function, Operation.DIV_I, Operation.DIV_F, "数据类型不对，不能相除");
+                return valueType;
+            }
+            case LE -> {
+                addInstructionInOperatorExpr(valueType, function, Operation.CMP_I, Operation.CMP_F, "数据类型不对，不能比较<=");
+                function.addInstruction(new Instruction(Operation.SET_GT));
+                function.addInstruction(new Instruction(Operation.NOT));
+                return ValueType.BOOL;
+            }
+            case GE -> {
+                addInstructionInOperatorExpr(valueType, function, Operation.CMP_I, Operation.CMP_F, "数据类型不对，不能比较>=");
+                function.addInstruction(new Instruction(Operation.SET_LT));
+                function.addInstruction(new Instruction(Operation.NOT));
+                return ValueType.BOOL;
+            }
+            case LT -> {
+                addInstructionInOperatorExpr(valueType, function, Operation.CMP_I, Operation.CMP_F, "数据类型不对，不能比较<");
+                function.addInstruction(new Instruction(Operation.SET_LT));
+                return ValueType.BOOL;
+            }
+            case GT -> {
+                addInstructionInOperatorExpr(valueType, function, Operation.CMP_I, Operation.CMP_F, "数据类型不对，不能比较>");
+                function.addInstruction(new Instruction(Operation.SET_GT));
+                return ValueType.BOOL;
+            }
+            case NEQ -> {
+                addInstructionInOperatorExpr(valueType, function, Operation.CMP_I, Operation.CMP_F, "数据类型不对，不能比较!=");
+                return ValueType.BOOL;
+            }
+            case EQ -> {
+                addInstructionInOperatorExpr(valueType, function, Operation.CMP_I, Operation.CMP_F, "数据类型不对，不能比较==");
+                function.addInstruction(new Instruction(Operation.NOT));
+                return ValueType.BOOL;
+            }
+            default -> throw new AnalyzeError(ErrorCode.InvalidVariableType, currentToken().getStartPos(), "operator类型不对");
+        }
+    }
+
+    private void addInstructionInOperatorExpr(ValueType valueType, Function function, Operation operation1, Operation operation2, String message) throws AnalyzeError {
+        if (valueType == ValueType.INT)
+            function.addInstruction(new Instruction(operation1));
+        else if (valueType == ValueType.DOUBLE)
+            function.addInstruction(new Instruction(operation2));
+        else
+            throw new AnalyzeError(ErrorCode.InvalidVariableType, currentToken().getStartPos(), message);
+    }
+
+    private ValueType analyseNegateExpr(Function function) throws CompileError {
+        // negate_expr -> '-' expr
+        expect(TokenType.MINUS);
+        ValueType type = analyseExpr(function);
+        if (type == ValueType.INT)
+            function.addInstruction(new Instruction(Operation.NEG_I));
+        else if (type == ValueType.DOUBLE)
+            function.addInstruction(new Instruction(Operation.NEG_F));
+        return type;
+    }
+
+    private ValueType analyseAssignExpr(Function function) throws CompileError {
+        // assign_expr -> l_expr '=' expr
+        // l_expr -> IDENT
+        String name = expect(TokenType.IDENT).getValueString();
+        Variable l_expr = (Variable) symbolTableStack.getSymbolByName(name, peek().getStartPos());
+        if (l_expr.isConst())
+            throw new AnalyzeError(ErrorCode.ConstValueChanged, peek().getStartPos(), "不能对const变量进行赋值");
+        expect(TokenType.ASSIGN);
+        if (l_expr.getSymbolType() == SymbolType.GLOBAL)
+            function.addInstruction(new Instruction(Operation.GLOBA, l_expr.getAddress()));
+        else if (l_expr.getSymbolType() == SymbolType.PARAM)
+            function.addInstruction(new Instruction(Operation.ARGA, l_expr.getAddress()));
+        else if (l_expr.getSymbolType() == SymbolType.LOCAL)
+            function.addInstruction(new Instruction(Operation.LOCA, l_expr.getAddress()));
+        else
+            throw new AnalyzeError(ErrorCode.InvalidAssign, peek().getStartPos(), "非法赋值，l_expr不属于GLOBAL/PARA/LOCAL");
+        ValueType type = analyseExpr(function);
+        if (type != l_expr.getValueType())
+            throw new AnalyzeError(ErrorCode.InvalidAssign, peek().getStartPos(), "非法赋值，左右表达式类型不同");
+        function.addInstruction(new Instruction(Operation.STORE_64));
         return ValueType.VOID;
     }
 
+    private ValueType analyseCallExpr(Function function) throws CompileError {
+        // call_param_list -> expr (',' expr)*
+        // call_expr -> IDENT '(' call_param_list? ')'
+        String name = expect(TokenType.IDENT).getValueString();
 
-    private ValueType analyseGroupExpr(Function function){
+        // 首先检查是否是标准库中的函数
+        switch (name) {
+            case "getint" -> {
+                return standardIn(Operation.SCAN_I, ValueType.INT, function);
+            }
+            case "getdouble" -> {
+                return standardIn(Operation.SCAN_F, ValueType.DOUBLE, function);
+            }
+            case "getchar" -> {
+                return standardIn(Operation.SCAN_C, ValueType.INT, function);
+            }
+            case "putln" -> {
+                return standardIn(Operation.PRINTLN, ValueType.VOID, function);
+            }
+            case "putint" -> {
+                return standardOut(Operation.PRINT_I, function);
+            }
+            case "putdouble" -> {
+                return standardOut(Operation.PRINT_F, function);
+            }
+            case "putchar" -> {
+                return standardOut(Operation.PRINT_C, function);
+            }
+            case "putstr" -> {
+                expect(TokenType.L_PAREN);
+                if (peek().getTokenType() == TokenType.STRING_LITERAL)
+                    analyseLiteralExpr(function);
+                else if (analyseExpr(function) != ValueType.INT)
+                    throw new AnalyzeError(ErrorCode.TypeNotMatch, peek().getStartPos(), "putstr参数应该是int类型");
+                expect(TokenType.R_PAREN);
+                function.addInstruction(new Instruction(Operation.PRINT_S));
+                return ValueType.VOID;
+            }
+        }
+        Function calledFunc;
+        // 是否是递归调用
+        if(name.equals(function.getName())){
+            calledFunc = function;
+        }
+        else calledFunc = funcTable.searchFunc(name, currentToken().getStartPos());
+
+        if(calledFunc.getReturnValueType() != ValueType.VOID){
+            int temp = 1;
+            function.addInstruction(new Instruction(Operation.STACKALLOC, temp&0x0FFFFFFFF));
+        }
+
+        // 准备参数，并检查参数列表和函数的声明是否匹配，包括参数个数和类型
+        expect(TokenType.L_PAREN);
+
+        for (ValueType type : calledFunc.getParamValueTypeList()){
+            if (peek().getTokenType() == TokenType.R_PAREN)
+                throw new AnalyzeError(ErrorCode.ParamNotEnough, peek().getStartPos(), "函数参数数目不足");
+            else if (type != analyseExpr(function))
+                throw new AnalyzeError(ErrorCode.TypeNotMatch, peek().getStartPos(), "函数参数类型不匹配");
+            if (peek().getTokenType() != TokenType.COMMA && peek().getTokenType() != TokenType.R_PAREN)
+                throw new AnalyzeError(ErrorCode.InvalidCallList, peek().getStartPos(), "函数列表结构非法");
+            if (peek().getTokenType() == TokenType.COMMA)
+                next();
+        }
+
+        expect(TokenType.R_PAREN);
+
+        function.addInstruction(new Instruction(Operation.CALL, calledFunc.getAddress()));
+        return calledFunc.getReturnValueType();
+    }
+
+    private ValueType standardIn(Operation operation, ValueType valueType, Function function) throws CompileError {
+        expect(TokenType.L_PAREN);
+        expect(TokenType.R_PAREN);
+        function.addInstruction(new Instruction(operation));
+        return valueType;
+    }
+
+    private ValueType standardOut(Operation operation, Function function) throws CompileError {
+        expect(TokenType.L_PAREN);
+        if (analyseExpr(function) != ValueType.INT)
+            throw new AnalyzeError(ErrorCode.TypeNotMatch, peek().getStartPos(), "参数应该是int类型");
+        expect(TokenType.R_PAREN);
+        function.addInstruction(new Instruction(operation));
         return ValueType.VOID;
     }
 
-    private ValueType analyseCallExpr(Function function){
+    private ValueType analyseLiteralExpr(Function function) throws AnalyzeError {
+        // literal_expr -> UINT_LITERAL | DOUBLE_LITERAL | STRING_LITERAL
+        TokenType t = peek().getTokenType();
+        if (t == TokenType.UINT_LITERAL){
+            long value = Long.parseLong(peek().getValueString());
+            function.addInstruction(new Instruction(Operation.PUSH, value));
+            next();
+            return ValueType.INT;
+        }
+        else if (t == TokenType.DOUBLE_LITERAL){
+            double value = Double.parseDouble(peek().getValueString());
+            function.addInstruction(new Instruction(Operation.PUSH, value));
+            next();
+            return ValueType.DOUBLE;
+        }
+        else if (t == TokenType.CHAR_LITERAL){
+            long value = Long.parseLong(peek().getValueString());
+            function.addInstruction(new Instruction(Operation.PUSH, value));
+            next();
+            return ValueType.INT;
+        }
+        else if (t == TokenType.STRING_LITERAL){
+            SymbolTable globalTable = symbolTableStack.get(0);
+            Variable variable = new Variable("", SymbolType.GLOBAL,ValueType.STRING);
+            variable.setLength(peek().getValueString().length());
+            int address = globalTable.getSymbolLength();
+            variable.setAddress(address);
+
+            funcNameAndStringMap.put(address, peek().getValueString());
+            globalTable.addSymbol(variable, currentToken().getStartPos());
+            function.addInstruction(new Instruction(Operation.PUSH, address));
+            next();
+            return ValueType.INT;
+        }
         return ValueType.VOID;
     }
 
-    private ValueType analyseAssignExpr(Function function){
-        return ValueType.VOID;
+    private ValueType analyseIdentExpr(Function function) throws CompileError {
+        // ident_expr -> IDENT
+        String name = expect(TokenType.IDENT).getValueString();
+        SymbolTable currentTable = symbolTableStack.getCurrentTable();
+        Variable var = (Variable)currentTable.searchSymbol(name, currentToken().getStartPos());
+        if (var.getSymbolType() == SymbolType.GLOBAL)
+            function.addInstruction(new Instruction(Operation.GLOBA, var.getAddress()));
+        else if (var.getSymbolType() == SymbolType.PARAM)
+            function.addInstruction(new Instruction(Operation.ARGA, var.getAddress()));
+        else if (var.getSymbolType() == SymbolType.LOCAL)
+            function.addInstruction(new Instruction(Operation.LOCA, var.getAddress()));
+        function.addInstruction(new Instruction(Operation.LOAD_64));
+        return var.getValueType();
     }
 
-    private ValueType analyseLiteralExpr(Function function){
-        return ValueType.VOID;
-    }
-
-    private ValueType analyseNegateExpr(Function function){
-        return ValueType.VOID;
+    private ValueType analyseGroupExpr(Function function) throws CompileError {
+        // group_expr -> '(' expr ')'
+        expect(TokenType.L_PAREN);
+        ValueType ret = analyseExpr(function);
+        expect(TokenType.R_PAREN);
+        return ret;
     }
 
     private boolean less(TokenType a,TokenType b)
@@ -625,8 +848,7 @@ public final class Analyser {
                 return false;
             return true;
         }
-        else if(a == TokenType.PLUS || a == TokenType.MINUS)
-        {
+        else if(a == TokenType.PLUS || a == TokenType.MINUS){
             if(b == TokenType.MUL || b == TokenType.DIV) return true;
             return false;
         }

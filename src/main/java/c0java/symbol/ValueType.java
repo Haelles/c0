@@ -5,5 +5,6 @@ public enum ValueType {
     INT,
     VOID,
     DOUBLE,
-    STRING
+    STRING,
+    BOOL
 }
