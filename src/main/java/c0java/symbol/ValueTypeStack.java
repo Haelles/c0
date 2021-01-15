@@ -1,5 +1,7 @@
 package c0java.symbol;
 
+import c0java.tokenizer.TokenType;
+
 import java.util.ArrayList;
 
 public class ValueTypeStack {
@@ -23,6 +25,14 @@ public class ValueTypeStack {
     public ValueType pop(){
         top -= 1;
         return valueTypeStack.get(top);
+    }
+
+    public ValueType getTopElement(){
+        return valueTypeStack.get(top - 1);
+    }
+
+    public ValueType getElement(int i){
+        return valueTypeStack.get(i);
     }
 
     public boolean isEmptyStack(){

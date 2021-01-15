@@ -74,7 +74,8 @@ public class Tokenizer {
     public ArrayList<Token> generateTokens() throws TokenizeError {
         while (true) {
             var token = nextToken();
-            if (token.getTokenType().equals(TokenType.EOF)) {
+            if (token.getTokenType().equals(TokenType.SHARP)){
+                addToken(token);
                 break;
             }
             if(token.getTokenType() != TokenType.COMMENT)
@@ -98,7 +99,7 @@ public class Tokenizer {
         skipSpaceCharacters();
 
         if (it.isEOF()) {
-            return new Token(TokenType.EOF, "", it.currentPos(), it.currentPos());
+            return new Token(TokenType.SHARP, "", it.currentPos(), it.currentPos());
         }
 
         stepCurPeek();

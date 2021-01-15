@@ -25,6 +25,14 @@ public class TokenTypeStack {
         return tokenTypeStack.get(top);
     }
 
+    public TokenType getTopElement(){
+        return tokenTypeStack.get(top - 1);
+    }
+
+    public TokenType getElement(int i){
+        return tokenTypeStack.get(i);
+    }
+
     public boolean isEmptyStack(){
         return top == 0;
     }

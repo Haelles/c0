@@ -23,5 +23,6 @@ public enum ErrorCode {
     InvalidVariableType,
     InvalidReturnTYpe,
     InvalidStructure,
-    IndexOutOfBound
+    IndexOutOfBound,
+    TypeNotMatch
 }

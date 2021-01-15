@@ -122,7 +122,7 @@ public final class Analyser {
                 analyseFunc();
             else if (tokenType == TokenType.LET_KW || tokenType == TokenType.CONST_KW)
                 analyseDeclStmt(_start);
-            else if (tokenType == TokenType.EOF) {
+            else if (tokenType == TokenType.SHARP) {
                 break;
             } else {
                 List<TokenType> expectedTokenType = new LinkedList<>();
@@ -456,8 +456,8 @@ public final class Analyser {
 
         while (tokenizer.hasNext() && inFirstSetOfExprStmt(peek().getTokenType())){
             Token peek = peek();
-            TokenType peekTokenType = peek().getTokenType();
-            if(peek.getTokenType() == TokenType.L_PAREN){
+            TokenType peekTokenType = peek.getTokenType();
+            if(peekTokenType == TokenType.L_PAREN){
                 if(operatorStack.getTop() <= typeStack.getTop()){
                     throw new AnalyzeError(ErrorCode.InvalidStructure, peek.getStartPos(), "两个表达式不能相邻");
                 }
@@ -494,14 +494,67 @@ public final class Analyser {
             else if(peekTokenType == TokenType.AS_KW){
                 next();
                 TokenType tokenType = expect(TokenType.TY).getTokenType();
-                // TODO
+                // 注意&&和||的优先级
+                if(operatorStack.getTop() > typeStack.getTop() || (tokenType != TokenType.UINT_LITERAL && tokenType !=
+                        TokenType.DOUBLE_LITERAL) || typeStack.getTop() <= 0){
+                    throw new AnalyzeError(ErrorCode.InvalidStructure, peek.getStartPos(), "无法进行类型转换");
+                }
+                if (typeStack.getTopElement() == ValueType.INT && tokenType == TokenType.DOUBLE_LITERAL){
+                    typeStack.pop();
+                    typeStack.push(ValueType.DOUBLE);
+                    function.addInstruction(new Instruction(Operation.ITOF));
+                }
+                else if (typeStack.getTopElement() == ValueType.DOUBLE && tokenType == TokenType.UINT_LITERAL)
+                {
+                    typeStack.pop();
+                    typeStack.push(ValueType.INT);
+                    function.addInstruction(new Instruction(Operation.FTOI));
+                }
+                else
+                    throw new AnalyzeError(ErrorCode.InvalidStructure, peek.getStartPos(), "不满足int<->double的要求");
             }
+            else{
+                if (operatorStack.getTop() != typeStack.getTop() || peekTokenType == TokenType.ASSIGN || peekTokenType == TokenType.TY)
+                    throw new AnalyzeError(ErrorCode.InvalidStructure, peek.getStartPos(), "表达式结构非法");
+                else if(peekTokenType == TokenType.R_PAREN || peekTokenType == TokenType.COMMA){
+                    if(typeStack.getTop() == 1)
+                        return typeStack.getTopElement();
+                    else break;
+                }
 
+                // 这里开始使用算符优先文法
+                // 不会出现 (、ident、和前置-，这时一定是符号
+
+                if (less(operatorStack.getTopElement(), peekTokenType)){
+                    // 移入
+                    operatorStack.push(next().getTokenType());
+                }
+                else{
+                    // 归约
+                    if (typeStack.getTopElement() != typeStack.getElement(typeStack.getTop() - 2))
+                        throw new AnalyzeError(ErrorCode.TypeNotMatch, peek.getStartPos(), "type does not match!");
+                    ValueType tmp = analyseOperatorExpr(typeStack.getTopElement(), operatorStack.getTopElement(), function);
+                    typeStack.pop();
+                    typeStack.pop();
+                    operatorStack.pop();
+                    typeStack.push(tmp);
+                }
+            }
         }
-
-
-
+        while (operatorStack.getTopElement() != TokenType.SHARP)
+        {
+            if (typeStack.getTopElement() != typeStack.getElement(typeStack.getTop() - 2))
+                throw new AnalyzeError(ErrorCode.TypeNotMatch, peek().getStartPos(), "type does not match!");
+            typeStack.push(analyseOperatorExpr(typeStack.pop(), operatorStack.pop(), function));
+            typeStack.pop();
+        }
+        return typeStack.getElement(0);
     }
+
+    private ValueType analyseOperatorExpr(ValueType valueType, TokenType tokenType, Function function){
+        return ValueType.VOID;
+    }
+
 
     private ValueType analyseGroupExpr(Function function){
         return ValueType.VOID;
@@ -521,5 +574,24 @@ public final class Analyser {
 
     private ValueType analyseNegateExpr(Function function){
         return ValueType.VOID;
+    }
+
+    private boolean less(TokenType a,TokenType b)
+    {
+        // 只用考虑 + -  * / 和比较
+        if(a == b) return false;
+        else if(a == TokenType.SHARP) return b != TokenType.SHARP;
+        else if(b == TokenType.SHARP) return false;
+        else if(a == TokenType.LT || a == TokenType.GT || a == TokenType.LE || a == TokenType.GE){
+            if(b == TokenType.LT || b == TokenType.GT || b == TokenType.LE || b == TokenType.GE || b == TokenType.SHARP)
+                return false;
+            return true;
+        }
+        else if(a == TokenType.PLUS || a == TokenType.MINUS)
+        {
+            if(b == TokenType.MUL || b == TokenType.DIV) return true;
+            return false;
+        }
+        else return false;
     }
 }
