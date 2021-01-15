@@ -31,9 +31,7 @@ public class SymbolTableStack {
      * 获得父级符号表
      */
     public SymbolTable getCurrentTable() {
-        if (top >= 2)
-            return stack.get(top - 1);
-        else return stack.get(0); // 全局符号表
+        return stack.get(top - 1);
     }
 
     /**
@@ -41,6 +39,6 @@ public class SymbolTableStack {
      * @return 当前符号表是否是全局符号表
      */
     public boolean isGlobalTable(){
-        return top == 2;
+        return top == 1;
     }
 }

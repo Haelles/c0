@@ -4,12 +4,14 @@ import c0java.error.*;
 import c0java.instruction.Instruction;
 import c0java.instruction.Operation;
 import c0java.symbol.*;
+import c0java.symbol.func.FuncTable;
 import c0java.symbol.func.Function;
 import c0java.symbol.variable.Variable;
 import c0java.tokenizer.Token;
 import c0java.tokenizer.TokenType;
 import c0java.tokenizer.TokenTypeStack;
 import c0java.tokenizer.Tokenizer;
+import c0java.util.Pos;
 
 import java.util.*;
 
@@ -25,6 +27,10 @@ public final class Analyser {
 
     // 符号表的栈
     private SymbolTableStack symbolTableStack;
+    // 单独拿出函数表作为一个属性
+    private FuncTable funcTable;
+    // 存储函数名和string
+    private HashMap<Integer, String> funcNameAndStringMap;
 
 //    /** 下一个变量的栈偏移 */
 //    int nextOffset = 0;
@@ -97,15 +103,28 @@ public final class Analyser {
         return instructions;
     }
 
-    private void initStart() throws TokenizeError {
+    private void initStart() throws TokenizeError, AnalyzeError {
         Function _start = new Function(SymbolType.FUNC, "_start");
-        _start.setAddress(0); // 固定为0号函数
-        _start.setLength(6);
+        _start.setAddress(0); // 在函数表的位置为0
+
+        Variable fn_name = new Variable(""); // 函数名和字符串均是匿名
+        fn_name.setSymbolType(SymbolType.GLOBAL);
+        fn_name.setValueType(ValueType.STRING);
+        fn_name.setAddress(0); // 在全局符号表的位置为0
+        fn_name.setLength(6);
+
+        funcTable = new FuncTable();
+        funcTable.addSymbol(_start, new Pos(0, 0));
+
         SymbolTable globalTable = new SymbolTable();
-        SymbolTable funcTable = new SymbolTable();
-        funcTable.addSymbol(_start);
+        globalTable.addSymbol(fn_name, new Pos(0, 0));
         symbolTableStack.push(globalTable); // 全局变量表固定在栈的第0位
-        symbolTableStack.push(funcTable);
+
+        // 生成字符串存储表，存入_start
+        funcNameAndStringMap = new HashMap<>();
+        funcNameAndStringMap.put(0, "_start");
+
+        // 生成token序列
         tokenizer.generateTokens();
     }
 
@@ -114,7 +133,7 @@ public final class Analyser {
     //item -> function | decl_stmt
     private void analyseProgram() throws CompileError {
         Token peek;
-        Function _start = (Function) symbolTableStack.get(1).getSymbol(0); // 获得_start
+        Function _start = (Function) funcTable.getSymbol(0); // 获得_start
         while (tokenizer.hasNext()) {
             peek = tokenizer.peekNextToken();
             TokenType tokenType = peek.getTokenType();
@@ -149,30 +168,41 @@ public final class Analyser {
         // 分析函数名，检查是否重复
         Token ident = expect(TokenType.IDENT);
         SymbolTable globalTable = symbolTableStack.get(0);
-        SymbolTable funcTable = symbolTableStack.get(1);
         String funcName = ident.getValueString();
         if (globalTable.isDeclared(funcName) || funcTable.isDeclared(funcName)) {
             throw new DuplicateError(ident.getStartPos(), "函数名字与已有函数/全局变量重复");
         }
         Function function = new Function(SymbolType.FUNC, ident.getValueString());
+        expect(TokenType.L_PAREN);
         // 分析参数
-        ArrayList<Symbol> params = analyseParam(function);
-
-        Token returnValue = expect(TokenType.TY);
-        // 添加参数和返回值，函数名字长度
-        function.addParams(returnValue.getValueString(), params);
-        function.setLength(funcName.length());
+        ArrayList<Variable> params = analyseParam(function);
 
         expect(TokenType.R_PAREN);
         expect(TokenType.ARROW);
 
+        Token returnValue = expect(TokenType.TY);
+        // 添加参数和返回值，函数名字长度
+        function.addParams(returnValue, params);
+
         // 添加一张局部变量表，开始对函数体进行分析
         SymbolTable localTable = new SymbolTable();
+        // 先加入参数到变量表中
+        for(Symbol param : params){
+            localTable.addSymbol(param, tokenizer.getCurrentToken().getStartPos());
+        }
+        function.setAddress(funcTable.getNextFid()); // 第几个函数
+
         symbolTableStack.push(localTable);
         analyseBlockStmt(function, -1); // 用-1表示不在while中
 
-        // 函数合法，添加到全局变量表
-        funcTable.addSymbol(function);
+        // 函数名添加到全局变量表;函数合法，添加到函数表
+        Variable fn_name = new Variable(funcName, SymbolType.GLOBAL, ValueType.STRING);
+        fn_name.setLength(funcName.length());
+        fn_name.setAddress(globalTable.getSymbolLength());
+        funcNameAndStringMap.put(fn_name.getAddress(), funcName);
+        function.setFname(fn_name.getAddress());
+        funcTable.addSymbol(function, tokenizer.getCurrentToken().getStartPos());
+
 
         // 开始添加指令
         function.addInstruction(new Instruction(Operation.RET));
@@ -184,10 +214,10 @@ public final class Analyser {
      *
      * @param function 拥有这些参数的函数
      */
-    private ArrayList<Symbol> analyseParam(Function function) throws CompileError {
+    private ArrayList<Variable> analyseParam(Function function) throws CompileError {
         // function_param_list -> function_param (',' function_param)*
         // function_param -> 'const'? IDENT ':' ty
-        ArrayList<Symbol> params = new ArrayList<>();
+        ArrayList<Variable> params = new ArrayList<>();
         if (tokenizer.peekNextToken().getTokenType() == TokenType.R_PAREN)
             return params;
         params.add(nextParam());
@@ -199,17 +229,18 @@ public final class Analyser {
 
     private Variable nextParam() throws CompileError {
         Variable param;
-        boolean isInitialized = false;
+        boolean isConst = false;
         if (nextIf(TokenType.CONST_KW) != null)
-            isInitialized = true;
+            isConst = true;
 
         Token ident = expect(TokenType.IDENT);
         expect(TokenType.COLON);
         Token returnType = expect(TokenType.TY);
         String type = returnType.getValueString();
         param = new Variable(returnType.getValueString());
-        if (isInitialized)
-            param.setInitialized(true);
+        param.setSymbolType(SymbolType.PARAM);
+        if (isConst)
+            param.setIsConst(true);
         param.setLength(8);
         param.setVariableValueType(returnType);
 
@@ -297,17 +328,23 @@ public final class Analyser {
         variable.setInitialized(false); // 是否被初始化了
         variable.setIsConst(isConst);  // 是否是定值
         boolean isGlobal = symbolTableStack.isGlobalTable();
-        if(isGlobal) // 是全局变量吗
+        if(isGlobal){ // 是全局变量吗
             variable.setSymbolType(SymbolType.GLOBAL);
-        else variable.setSymbolType(SymbolType.LOCAL);
+            variable.setAddress(currentTable.getSymbolLength());
+        }
+        else{
+            variable.setSymbolType(SymbolType.LOCAL);
+            variable.setAddress(function.nextLocal());
+        }
         variable.setVariableValueType(identTypeToken); // 是哪种数据类型，是void则抛异常
         variable.setLength(8);
 
         // 添加到符号表
-        currentTable.addSymbol(variable);
+        currentTable.addSymbol(variable, ident.getStartPos());
 
         // 准备开始对表达式进行分析
         if(peek().getTokenType() == TokenType.ASSIGN){
+            next();
             if(isGlobal)
                 function.addInstruction(new Instruction(Operation.GLOBA, variable.getAddress()));
             else function.addInstruction(new Instruction(Operation.LOCA, variable.getAddress()));
@@ -316,6 +353,7 @@ public final class Analyser {
                 throw new AnalyzeError(ErrorCode.InvalidVariableType,
                         tokenizer.getCurrentToken().getStartPos(), "expr表达式返回类型不合预期");
             variable.setInitialized(true); // 有表达式，已经被初始化
+            function.addInstruction(new Instruction(Operation.STORE_64));
         }
         else if(isConst){
             throw new ExpectedTokenError(TokenType.ASSIGN, tokenizer.getCurrentToken());

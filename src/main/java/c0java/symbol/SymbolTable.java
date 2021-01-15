@@ -1,5 +1,9 @@
 package c0java.symbol;
 
+import c0java.error.AnalyzeError;
+import c0java.error.ErrorCode;
+import c0java.util.Pos;
+
 import java.util.ArrayList;
 
 public class SymbolTable {
@@ -13,9 +17,11 @@ public class SymbolTable {
         return symbolList;
     }
 
-    public void addSymbol(Symbol symbol){
+    public void addSymbol(Symbol symbol, Pos pos) throws AnalyzeError {
+        if(isDeclared(symbol.getName())){
+            throw new AnalyzeError(ErrorCode.DuplicateDeclaration, pos, symbol.getName() + "已经被声明");
+        }
         symbolList.add(symbol);
-        symbol.setAddress(symbolList.size() - 1);
     }
 
     public int getSymbolLength(){
@@ -23,6 +29,8 @@ public class SymbolTable {
     }
 
     public boolean isDeclared(String symbolName){
+        if(symbolName.equals(""))
+            return false;
         for(Symbol symbol : symbolList){
             if (symbol.getName().equals(symbolName))
                 return true;

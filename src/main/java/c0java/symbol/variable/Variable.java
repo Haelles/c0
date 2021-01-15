@@ -12,9 +12,15 @@ public class Variable extends Symbol {
     private ValueType valueType; // 是哪种数据类型的变量
     private boolean isInitialized = false;
     private boolean isConst = false;
+    private int length; // 变量长度为几个字节
 
     public Variable(String name){
         super(name);
+    }
+
+    public Variable(String name, SymbolType symbolType, ValueType valueType){
+        super(symbolType, name);
+        this.valueType = valueType;
     }
 
     public void setInitialized(boolean isInitialized){
@@ -23,6 +29,10 @@ public class Variable extends Symbol {
 
     public void setIsConst(boolean isConst){
         this.isConst = isConst;
+    }
+
+    public void setLength(int length){
+        this.length = length;
     }
 
     public void setValueType(ValueType valueType){
