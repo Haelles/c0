@@ -107,13 +107,13 @@ public final class Analyser {
     }
 
 
-    public void analyse() throws CompileError, IOException, OutputError {
+    public void analyse(String fileName) throws CompileError, IOException, OutputError {
         // 首先对_start进行初始化，并生成tokens
         initStart();
         // 开始分析程序
         analyseProgram();
-        Output.outputBinary(symbolTableStack.get(0), funcNameAndStringMap, funcTable);
-        Output.outputFile(symbolTableStack.get(0), funcNameAndStringMap, funcTable);
+        Output.outputBinary(symbolTableStack.get(0), funcNameAndStringMap, funcTable, fileName);
+        // Output.outputFile(symbolTableStack.get(0), funcNameAndStringMap, funcTable, "result.txt");
     }
 
     private void initStart() throws TokenizeError, AnalyzeError {

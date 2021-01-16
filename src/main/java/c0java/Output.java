@@ -18,8 +18,8 @@ public class Output {
     public static int magic = 0x72303b3e;
     public static int version = 0x00000001;
 
-    public static void outputBinary(SymbolTable global, HashMap<Integer, String> hashMap, FuncTable functions) throws IOException, OutputError {
-        DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(new FileOutputStream("result")));
+    public static void outputBinary(SymbolTable global, HashMap<Integer, String> hashMap, FuncTable functions, String fileName) throws IOException, OutputError {
+        DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(fileName)));
         // magic and version
         dos.writeInt(magic);
         dos.writeInt(version);
@@ -85,8 +85,8 @@ public class Output {
         dos.close();
     }
 
-    public static void outputFile(SymbolTable global, HashMap<Integer, String> hashMap, FuncTable functions) throws IOException, OutputError {
-        File file = new File("result.txt");
+    public static void outputFile(SymbolTable global, HashMap<Integer, String> hashMap, FuncTable functions, String fileName) throws IOException, OutputError {
+        File file = new File(fileName);
         if(!file.exists()){
             file.createNewFile();
         }

@@ -24,44 +24,14 @@ import net.sourceforge.argparse4j.inf.Namespace;
 
 public class App {
     public static void main(String[] args){
-        var argparse = buildArgparse();
-        Namespace result;
-        try {
-            result = argparse.parseArgs(args);
-        } catch (ArgumentParserException e1) {
-            argparse.handleError(e1);
-            return;
-        }
-
-        var inputFileName = result.getString("input");
-        var outputFileName = result.getString("output");
-
         InputStream input;
-        if (inputFileName.equals("-")) {
-            input = System.in;
-        } else {
-            try {
-                input = new FileInputStream(inputFileName);
-            } catch (FileNotFoundException e) {
-                System.err.println("Cannot find input file.");
-                e.printStackTrace();
-                System.exit(2);
-                return;
-            }
-        }
-
-        PrintStream output;
-        if (outputFileName.equals("-")) {
-            output = System.out;
-        } else {
-            try {
-                output = new PrintStream(new FileOutputStream(outputFileName));
-            } catch (FileNotFoundException e) {
-                System.err.println("Cannot open output file.");
-                e.printStackTrace();
-                System.exit(2);
-                return;
-            }
+        try {
+            input = new FileInputStream(args[1]);
+        } catch (FileNotFoundException e) {
+            System.err.println("Cannot find input file.");
+            e.printStackTrace();
+            System.exit(-1);
+            return;
         }
 
         // 从这里对main进行修改
@@ -69,46 +39,16 @@ public class App {
         scanner = new Scanner(input);
         var iter = new StringIter(scanner);
         Tokenizer tokenizer = new Tokenizer(iter);
-
-        if (result.getBoolean("tokenize")) {
-            // tokenize
-            ArrayList<Token> tokens;
-            try {
-                tokens = tokenizer.generateTokens();
-            } catch (Exception e) {
-                // 遇到错误不输出，直接退出
-                System.out.println(e.toString());
-                System.exit(-1);
-                return;
-            }
-            for (Token token : tokens) {
-                output.println(token.toString());
-            }
-        } else if (result.getBoolean("analyse")) {
-            // analyze
-            var analyzer = new Analyser(tokenizer);
-            try {
-                analyzer.analyse();
-            } catch (Exception e) {
-                // 遇到错误不输出，直接退出
-                System.out.println(e.toString());
-                System.exit(-1);
-            }
-        } else {
-            System.err.println("Please specify either '--analyse' or '--tokenize'.");
+        // analyze
+        var analyzer = new Analyser(tokenizer);
+        try {
+            analyzer.analyse(args[3]);
+        } catch (Exception e) {
+            System.out.println(e.toString());
             System.exit(-1);
         }
+
     }
 
-    private static ArgumentParser buildArgparse() {
-        var builder = ArgumentParsers.newFor("c0-java");
-        var parser = builder.build();
-        parser.addArgument("-t", "--tokenize").help("Tokenize the input").action(Arguments.storeTrue());
-        parser.addArgument("-l", "--analyse").help("Analyze the input").action(Arguments.storeTrue());
-        parser.addArgument("-o", "--output").help("Set the output file").required(true).dest("output")
-                .action(Arguments.store());
-        parser.addArgument("file").required(true).dest("input").action(Arguments.store()).help("Input file");
-        return parser;
-    }
 
 }
