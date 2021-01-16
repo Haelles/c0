@@ -267,7 +267,10 @@ public class Tokenizer {
             case '!':
                 if(peek != '=')
                     throw new TokenizeError(ErrorCode.InvalidInput, startPos);
-                else return new Token(TokenType.NEQ, "!=", startPos, it.nextPos());
+                else{
+                    stepCurPeek();
+                    return new Token(TokenType.NEQ, "!=", startPos, it.nextPos());
+                }
 
             case '<':
                 if(peek == '='){
