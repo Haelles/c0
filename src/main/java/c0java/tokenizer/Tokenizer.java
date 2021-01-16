@@ -202,7 +202,7 @@ public class Tokenizer {
             return new Token(TokenType.DOUBLE_LITERAL, Double.parseDouble(buffer.toString()), startPos, it.currentPos());
         }
         else{ // 无符号整数
-            return new Token(TokenType.UINT_LITERAL, Integer.parseInt(buffer.toString()), startPos, it.currentPos());
+            return new Token(TokenType.UINT_LITERAL, Long.parseLong(buffer.toString()), startPos, it.currentPos());
         }
     }
 
