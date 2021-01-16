@@ -393,7 +393,7 @@ public final class Analyser {
             if(peek().getTokenType() == TokenType.IF_KW){
                 SymbolTable symbolTable2 = new SymbolTable();
                 symbolTableStack.push(symbolTable2);
-                analyseBlockStmt(function, inWhile);
+                analyseIfStmt(function, inWhile);
                 symbolTableStack.pop();
             }
             else {
