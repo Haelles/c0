@@ -50,10 +50,16 @@ public final class Analyser {
         return peekedToken;
     }
 
+    private Token previous() throws AnalyzeError {
+        peekedToken = null;
+        return tokenizer.moveToForward();
+    }
+
     private Token next() {
         if (peekedToken != null) {
             var token = peekedToken;
             peekedToken = null;
+            tokenizer.addCurrentPos();
             return token;
         } else {
             return tokenizer.getNextToken(); // 读头需要进行移位
@@ -159,7 +165,8 @@ public final class Analyser {
             }
         }
         // 准备输出
-
+        Function main = funcTable.searchFunc("main", currentToken().getStartPos());
+        _start.addInstruction(new Instruction(Operation.CALL, main.getAddress()));
     }
 
     /**
@@ -194,9 +201,10 @@ public final class Analyser {
         // 添加一张局部变量表，开始对函数体进行分析
         SymbolTable localTable = new SymbolTable();
         // 先加入参数到变量表中
-        for(Symbol param : params){
-            localTable.addSymbol(param, currentToken().getStartPos());
-        }
+        if(params.size() > 0)
+            for(Symbol param : params){
+                localTable.addSymbol(param, currentToken().getStartPos());
+            }
         function.setAddress(funcTable.getNextFid()); // 第几个函数
 
         symbolTableStack.push(localTable);
@@ -211,11 +219,6 @@ public final class Analyser {
         funcNameAndStringMap.put(fn_name.getAddress(), funcName);
         function.setFname(fn_name.getAddress());
         funcTable.addSymbol(function, currentToken().getStartPos());
-
-
-        // 开始添加指令
-        function.addInstruction(new Instruction(Operation.RET));
-
     }
 
     /**
@@ -304,9 +307,9 @@ public final class Analyser {
         // decl_stmt -> let_decl_stmt | const_decl_stmt
         Token peek = peek();
         if (peek.getTokenType() == TokenType.CONST_KW)
-            analyseLetDeclStmt(function);
-        else if(peek.getTokenType() == TokenType.LET_KW)
             analyseConstDeclStmt(function);
+        else if(peek.getTokenType() == TokenType.LET_KW)
+            analyseLetDeclStmt(function);
     }
 
     private void analyseLetDeclStmt(Function function) throws CompileError {
@@ -517,15 +520,15 @@ public final class Analyser {
                 next();
                 // 注意这里移位了，不能再用上面定义的peek
                 if(tokenizer.hasNext() && peek().getTokenType() == TokenType.L_PAREN){
-                    tokenizer.moveToForward();
+                    previous();
                     typeStack.push(analyseCallExpr(function));
                 }
                 else if(tokenizer.hasNext() && peek().getTokenType() == TokenType.ASSIGN){
-                    tokenizer.moveToForward();
+                    previous();
                     typeStack.push(analyseAssignExpr(function));
                 }
                 else{
-                    tokenizer.moveToForward();
+                    previous();
                     typeStack.push(analyseIdentExpr(function));
                 }
             }

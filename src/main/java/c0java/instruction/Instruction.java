@@ -64,9 +64,9 @@ public class Instruction {
             , 0x58
             , 0xfe };
     private Operation opt;
-    Integer x;
-    Long x1;
-    Double x2;
+    Integer x = null;
+    Long x1 = null;
+    Double x2 = null;
     Integer recordBreak = 0; //
     int chooseDataType = 0;
 
@@ -155,7 +155,7 @@ public class Instruction {
     public String toString() {
         return switch (this.opt) {
             case NOP -> "nop   ";
-            case PUSH -> "push  " + x1;
+            case PUSH -> "push  " + (x1 != null? x1: x2);
             case POP -> "pop   ";
             case POPN -> "popn  ";
             case DUP -> "dup   ";

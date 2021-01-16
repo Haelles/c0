@@ -30,6 +30,7 @@ public class Function extends Symbol {
         paramSlots = 0;
         localSlots = 0;
         returnSlots = 0;
+        instructions = new ArrayList<>();
     }
 
     public void setParamSlots(int paramSlots){
@@ -68,12 +69,13 @@ public class Function extends Symbol {
             default -> throw new AnalyzeError(ErrorCode.ExpectedToken,
                     returnValue.getStartPos(), "函数返回值类型有误");
         }
-        for(Variable variable : variables){
-            variable.setAddress(address);
-            address += 1;
-            paramSlots += 1;
-            paramValueTypeList.add(variable.getValueType());
-        }
+        if(variables.size() > 0)
+            for(Variable variable : variables){
+                variable.setAddress(address);
+                address += 1;
+                paramSlots += 1;
+                paramValueTypeList.add(variable.getValueType());
+            }
     }
 
     public int addInstruction(Instruction instruction){

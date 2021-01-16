@@ -119,9 +119,9 @@ public enum TokenType {
             case GE:
                 return "GreaterOrEqualThan";
             case L_PAREN:
-                return "LeftBracket";
+                return "LeftParen";
             case R_PAREN:
-                return "RightBracket";
+                return "RightParen";
             case L_BRACE:
                 return "LightBrace";
             case R_BRACE:

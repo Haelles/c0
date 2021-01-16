@@ -19,7 +19,7 @@ public class Output {
     public static int version = 0x00000001;
 
     public static void outputBinary(SymbolTable global, HashMap<Integer, String> hashMap, FuncTable functions) throws IOException, OutputError {
-        DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(new FileOutputStream("res")));
+        DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(new FileOutputStream("result")));
         // magic and version
         dos.writeInt(magic);
         dos.writeInt(version);
@@ -34,14 +34,14 @@ public class Output {
             if(variable.getSymbolType() != SymbolType.GLOBAL)
                 throw new OutputError("全局变量表中存在非GLOBAL变量");
             if(variable.isConst())
-                dos.writeChar(0x01);
-            else dos.writeChar(0x00);
+                dos.writeByte(0x01);
+            else dos.writeByte(0x00);
             dos.writeInt(variable.getLength());
             if (variable.getValueType() == ValueType.STRING){
                 addr = variable.getAddress();
                 temp = hashMap.get(addr).toCharArray();
                 for(char c : temp)
-                    dos.writeChar(c);
+                    dos.writeByte(c);
             }
             else{
                 long t = 0;
@@ -66,7 +66,7 @@ public class Output {
             n = instructions.size();
             dos.writeInt(n);
             for(Instruction instruction : instructions){
-                dos.writeChar(Instruction.instructionToBinaryCode[instruction.operationToInt()]);
+                dos.writeByte(Instruction.instructionToBinaryCode[instruction.operationToInt()]);
                 switch (instruction.getChooseDataType()){
                     case 1:
                         dos.writeInt(instruction.getX());
@@ -94,8 +94,8 @@ public class Output {
         FileWriter fileWriter = new FileWriter(file.getAbsoluteFile());
         BufferedWriter bw = new BufferedWriter(fileWriter);
 
-        bw.write("magic: " + magic + "\n");
-        bw.write("version: " + version + "\n");
+        bw.write("magic: " + Integer.toHexString(magic) + "\n");
+        bw.write("version: " + Integer.toHexString(version) + "\n");
 
         // global
         bw.write("global size: " + global.getSymbolLength() + "\n");
@@ -108,7 +108,7 @@ public class Output {
             bw.write("is const: " + variable.isConst() + "\n");
             bw.write("size: " + variable.getLength() + "\n");
             if (variable.getValueType() == ValueType.STRING){
-                bw.write("string: " + hashMap.get(variable.getAddress()));
+                bw.write("string: " + hashMap.get(variable.getAddress()) + "\n");
             }
             else{
                 // 用0填充，在_start函数里面去完成赋值
@@ -116,8 +116,10 @@ public class Output {
             }
         }
 
+        bw.write("-----区分global和func------\n");
+
         // functions
-        bw.write(functions.getSymbolLength());
+        bw.write(functions.getSymbolLength() + "\n");
         ArrayList<Symbol> funcList = functions.getSymbolList();
         Function function;
         ArrayList<Instruction> instructions;

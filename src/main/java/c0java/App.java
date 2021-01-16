@@ -77,7 +77,7 @@ public class App {
                 tokens = tokenizer.generateTokens();
             } catch (Exception e) {
                 // 遇到错误不输出，直接退出
-                System.err.println();
+                System.out.println(e.toString());
                 System.exit(-1);
                 return;
             }
@@ -91,7 +91,7 @@ public class App {
                 analyzer.analyse();
             } catch (Exception e) {
                 // 遇到错误不输出，直接退出
-                System.err.println();
+                System.out.println(e.toString());
                 System.exit(-1);
             }
         } else {

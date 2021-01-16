@@ -92,6 +92,6 @@ public class Token {
 
     public String toStringAlt() {
         return new StringBuilder().append("Token(").append(this.tokenType).append(", value: ").append(value)
-                .append("at: ").append(this.startPos).toString();
+                .append(", at: ").append(this.startPos).toString();
     }
 }

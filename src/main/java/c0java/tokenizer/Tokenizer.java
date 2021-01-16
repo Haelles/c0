@@ -59,6 +59,10 @@ public class Tokenizer {
         return tokens.get(i);
     }
 
+    public void addCurrentPos(){
+        currentPos += 1;
+    }
+
     public Token moveToForward() throws AnalyzeError {
         currentPos -= 1;
         if(currentPos < 0)
