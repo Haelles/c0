@@ -469,6 +469,7 @@ public final class Analyser {
         if(valueType == ValueType.VOID && peek.getTokenType() != TokenType.SEMICOLON)
             throw new AnalyzeError(ErrorCode.ExpectedToken,
                     currentToken().getStartPos(), "函数为void类型，下一个token应该是分号");
+        function.addInstruction(new Instruction(Operation.ARGA,0));
         if(function.getReturnValueType() != analyseExpr(function))
             throw new AnalyzeError(ErrorCode.ExpectedToken,
                     currentToken().getStartPos(), "需要合适的token类型来进入expr");
