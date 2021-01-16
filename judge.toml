@@ -1,4 +1,4 @@
-[jobs.minic0]
+[jobs.c0]
 image = {source = "dockerfile", path = ".", tag = "c0-java"}
 run = [
   "java -jar build/libs/c0java.jar -l $input -o $output",
