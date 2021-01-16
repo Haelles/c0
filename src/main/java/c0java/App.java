@@ -1,11 +1,6 @@
 package c0java;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -25,12 +20,27 @@ import net.sourceforge.argparse4j.inf.Namespace;
 public class App {
     public static void main(String[] args){
         InputStream input;
+        FileInputStream input2;
         try {
             input = new FileInputStream(args[1]);
+            input2 = new FileInputStream(args[1]);
+            byte[] bbuf = new byte[1024];
+            //用于保存实际读取的字节数
+            int hasRead = 0;
+            //使用循环来重复读取数据
+            while( (hasRead = input2.read(bbuf)) > 0){
+                //将字节数组转换为字符串输出
+                System.out.print(new String(bbuf,0,hasRead));
+            }
+            //关闭文件输出流，放在finally块里更安全
+            input2.close();
         } catch (FileNotFoundException e) {
             System.err.println("Cannot find input file.");
             e.printStackTrace();
             System.exit(-1);
+            return;
+        } catch (IOException e) {
+            e.printStackTrace();
             return;
         }
 
