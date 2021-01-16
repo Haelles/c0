@@ -3,34 +3,32 @@ package c0java.tokenizer;
 import java.util.ArrayList;
 
 public class TokenTypeStack {
-    private ArrayList<TokenType> tokenTypeStack;
+    private TokenType[] tokenTypeStack;
     int top;
 
     public TokenTypeStack(){
-        tokenTypeStack = new ArrayList<>();
+        tokenTypeStack = new TokenType[200];
         top = 0;
     }
 
-    public ArrayList<TokenType> getTokenTypeStack(){
+    public TokenType[] getTokenTypeStack(){
         return tokenTypeStack;
     }
 
     public void push(TokenType tokenType){
-        tokenTypeStack.add(tokenType);
-        top += 1;
+       tokenTypeStack[top++] = tokenType;
     }
 
     public TokenType pop(){
-        top -= 1;
-        return tokenTypeStack.get(top);
+        return tokenTypeStack[--top];
     }
 
     public TokenType getTopElement(){
-        return tokenTypeStack.get(top - 1);
+        return tokenTypeStack[top - 1];
     }
 
     public TokenType getElement(int i){
-        return tokenTypeStack.get(i);
+        return tokenTypeStack[i];
     }
 
     public boolean isEmptyStack(){

@@ -5,34 +5,32 @@ import c0java.tokenizer.TokenType;
 import java.util.ArrayList;
 
 public class ValueTypeStack {
-    private ArrayList<ValueType> valueTypeStack;
+    private ValueType[] valueTypeStack;
     int top;
 
     public ValueTypeStack(){
-        valueTypeStack = new ArrayList<>();
+        valueTypeStack = new ValueType[200];
         top = 0;
     }
 
-    public ArrayList<ValueType> getvalueTypeStack(){
+    public ValueType[] getvalueTypeStack(){
         return valueTypeStack;
     }
 
     public void push(ValueType valueType){
-        valueTypeStack.add(valueType);
-        top += 1;
+        valueTypeStack[top++] = valueType;
     }
 
     public ValueType pop(){
-        top -= 1;
-        return valueTypeStack.get(top);
+        return valueTypeStack[--top];
     }
 
     public ValueType getTopElement(){
-        return valueTypeStack.get(top - 1);
+        return valueTypeStack[top - 1];
     }
 
     public ValueType getElement(int i){
-        return valueTypeStack.get(i);
+        return valueTypeStack[i];
     }
 
     public boolean isEmptyStack(){
