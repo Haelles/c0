@@ -824,8 +824,7 @@ public final class Analyser {
     private ValueType analyseIdentExpr(Function function) throws CompileError {
         // ident_expr -> IDENT
         String name = expect(TokenType.IDENT).getValueString();
-        SymbolTable currentTable = symbolTableStack.getCurrentTable();
-        Variable var = (Variable)currentTable.searchSymbol(name, currentToken().getStartPos());
+        Variable var = (Variable)symbolTableStack.getSymbolByName(name, currentToken().getStartPos());
         if (var.getSymbolType() == SymbolType.GLOBAL)
             function.addInstruction(new Instruction(Operation.GLOBA, var.getAddress()));
         else if (var.getSymbolType() == SymbolType.PARAM)

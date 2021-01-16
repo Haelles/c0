@@ -50,7 +50,7 @@ public class SymbolTableStack {
         if(symbolName.equals(""))
             throw new AnalyzeError(ErrorCode.VariableNotDecl, pos, "不能查找匿名对象");
         int i = top - 1;
-        for(; i >=0; --i){
+        for(; i >= 0; --i){
             ArrayList<Symbol> symbolTable = stack.get(i).getSymbolList();
             for(Symbol symbol : symbolTable){
                 if (symbol.getName().equals(symbolName))
