@@ -209,6 +209,7 @@ public final class Analyser {
 
         symbolTableStack.push(localTable);
         analyseBlockStmt(function, -1); // 用-1表示不在while中
+        function.addInstruction(new Instruction(Operation.RET));
         symbolTableStack.pop();
 
         // 函数名添加到全局变量表;函数合法，添加到函数表
