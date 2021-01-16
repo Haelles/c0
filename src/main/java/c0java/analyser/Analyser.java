@@ -294,7 +294,10 @@ public final class Analyser {
         } else if(tokenType == TokenType.RETURN_KW){
             analyseReturnStmt(function);
         } else if(tokenType == TokenType.L_BRACE){
+            SymbolTable localTable = new SymbolTable();
+            symbolTableStack.push(localTable);
             analyseBlockStmt(function, inWhile);
+            symbolTableStack.pop();
         } else if(tokenType == TokenType.SEMICOLON){
             analyseEmptyStmt(function);
         } else if(inFirstSetOfExprStmt(tokenType))
