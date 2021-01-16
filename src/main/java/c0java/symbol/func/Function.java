@@ -31,6 +31,7 @@ public class Function extends Symbol {
         localSlots = 0;
         returnSlots = 0;
         instructions = new ArrayList<>();
+        paramValueTypeList = new ArrayList<>();
     }
 
     public void setParamSlots(int paramSlots){

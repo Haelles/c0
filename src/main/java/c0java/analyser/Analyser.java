@@ -113,7 +113,7 @@ public final class Analyser {
         // 开始分析程序
         analyseProgram();
         Output.outputBinary(symbolTableStack.get(0), funcNameAndStringMap, funcTable, fileName);
-        // Output.outputFile(symbolTableStack.get(0), funcNameAndStringMap, funcTable, "result.txt");
+        Output.outputFile(symbolTableStack.get(0), funcNameAndStringMap, funcTable, "result.txt");
     }
 
     private void initStart() throws TokenizeError, AnalyzeError {
@@ -250,7 +250,7 @@ public final class Analyser {
         expect(TokenType.COLON);
         Token returnType = expect(TokenType.TY);
         String type = returnType.getValueString();
-        param = new Variable(returnType.getValueString());
+        param = new Variable(ident.getValueString());
         param.setSymbolType(SymbolType.PARAM);
         if (isConst)
             param.setIsConst(true);
