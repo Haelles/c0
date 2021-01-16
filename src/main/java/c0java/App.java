@@ -24,6 +24,8 @@ import net.sourceforge.argparse4j.inf.Namespace;
 
 public class App {
     public static void main(String[] args){
+        for(String temp : args)
+            System.out.println(temp);
         InputStream input;
         try {
             input = new FileInputStream(args[1]);
