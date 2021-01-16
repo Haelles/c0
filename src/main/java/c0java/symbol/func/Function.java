@@ -108,4 +108,24 @@ public class Function extends Symbol {
     public ArrayList<ValueType> getParamValueTypeList() {
         return paramValueTypeList;
     }
+
+    public int getFname(){
+        return Fname;
+    }
+
+    public int getLocalSlots() {
+        return localSlots;
+    }
+
+    public int getParamSlots() {
+        return paramSlots;
+    }
+
+    public int getReturnSlots() {
+        return returnSlots;
+    }
+
+    public ArrayList<Instruction> getInstructions() {
+        return instructions;
+    }
 }

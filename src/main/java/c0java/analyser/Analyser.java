@@ -1,5 +1,6 @@
 package c0java.analyser;
 
+import c0java.Output;
 import c0java.error.*;
 import c0java.instruction.Instruction;
 import c0java.instruction.Operation;
@@ -13,6 +14,7 @@ import c0java.tokenizer.TokenTypeStack;
 import c0java.tokenizer.Tokenizer;
 import c0java.util.Pos;
 
+import java.io.IOException;
 import java.util.*;
 
 public final class Analyser {
@@ -99,12 +101,13 @@ public final class Analyser {
     }
 
 
-    public List<Instruction> analyse() throws CompileError {
+    public void analyse() throws CompileError, IOException, OutputError {
         // 首先对_start进行初始化，并生成tokens
         initStart();
         // 开始分析程序
         analyseProgram();
-        return instructions;
+        Output.outputBinary(symbolTableStack.get(0), funcNameAndStringMap, funcTable);
+        Output.outputFile(symbolTableStack.get(0), funcNameAndStringMap, funcTable);
     }
 
     private void initStart() throws TokenizeError, AnalyzeError {
@@ -738,7 +741,7 @@ public final class Analyser {
 
         if(calledFunc.getReturnValueType() != ValueType.VOID){
             int temp = 1;
-            function.addInstruction(new Instruction(Operation.STACKALLOC, temp&0x0FFFFFFFF));
+            function.addInstruction(new Instruction(Operation.STACKALLOC, temp));
         }
 
         // 准备参数，并检查参数列表和函数的声明是否匹配，包括参数个数和类型
@@ -778,7 +781,7 @@ public final class Analyser {
     }
 
     private ValueType analyseLiteralExpr(Function function) throws AnalyzeError {
-        // literal_expr -> UINT_LITERAL | DOUBLE_LITERAL | STRING_LITERAL
+        // literal_expr -> UINT_LITERAL | DOUBLE_LITERAL | STRING_LITERAL ｜ CHAR_LITERAL
         TokenType t = peek().getTokenType();
         if (t == TokenType.UINT_LITERAL){
             long value = Long.parseLong(peek().getValueString());
@@ -800,14 +803,14 @@ public final class Analyser {
         }
         else if (t == TokenType.STRING_LITERAL){
             SymbolTable globalTable = symbolTableStack.get(0);
-            Variable variable = new Variable("", SymbolType.GLOBAL,ValueType.STRING);
+            Variable variable = new Variable("", SymbolType.GLOBAL, ValueType.STRING);
             variable.setLength(peek().getValueString().length());
             int address = globalTable.getSymbolLength();
             variable.setAddress(address);
 
             funcNameAndStringMap.put(address, peek().getValueString());
             globalTable.addSymbol(variable, currentToken().getStartPos());
-            function.addInstruction(new Instruction(Operation.PUSH, address));
+            function.addInstruction(new Instruction(Operation.PUSH, (long)address));
             next();
             return ValueType.INT;
         }

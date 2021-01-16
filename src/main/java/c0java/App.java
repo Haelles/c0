@@ -23,7 +23,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 public class App {
-    public static void main(String[] args) throws CompileError {
+    public static void main(String[] args){
         var argparse = buildArgparse();
         Namespace result;
         try {
@@ -77,8 +77,8 @@ public class App {
                 tokens = tokenizer.generateTokens();
             } catch (Exception e) {
                 // 遇到错误不输出，直接退出
-                System.err.println(e);
-                System.exit(0);
+                System.err.println();
+                System.exit(-1);
                 return;
             }
             for (Token token : tokens) {
@@ -86,22 +86,17 @@ public class App {
             }
         } else if (result.getBoolean("analyse")) {
             // analyze
-//            var analyzer = new Analyser(tokenizer);
-//            List<Instruction> instructions;
-//            try {
-//                instructions = analyzer.analyse();
-//            } catch (Exception e) {
-//                // 遇到错误不输出，直接退出
-//                System.err.println(e);
-//                System.exit(-1);
-//                return;
-//            }
-//            for (Instruction instruction : instructions) {
-//                output.println(instruction.toString());
-//            }
+            var analyzer = new Analyser(tokenizer);
+            try {
+                analyzer.analyse();
+            } catch (Exception e) {
+                // 遇到错误不输出，直接退出
+                System.err.println();
+                System.exit(-1);
+            }
         } else {
             System.err.println("Please specify either '--analyse' or '--tokenize'.");
-            System.exit(3);
+            System.exit(-1);
         }
     }
 
@@ -116,8 +111,4 @@ public class App {
         return parser;
     }
 
-//    private static Tokenizer tokenize(StringIter iter) {
-//        var tokenizer = new Tokenizer(iter);
-//        return tokenizer;
-//    }
 }

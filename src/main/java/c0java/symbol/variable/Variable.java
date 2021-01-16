@@ -58,6 +58,10 @@ public class Variable extends Symbol {
         return valueType;
     }
 
+    public int getLength(){
+        return length;
+    }
+
     public boolean isConst() {
         return isConst;
     }
