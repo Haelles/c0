@@ -418,9 +418,9 @@ public final class Analyser {
         int br0 = function.addInstruction(new Instruction(Operation.BR, 0));
 
         ValueType valueType = analyseExpr(function);
-        if(valueType != ValueType.INT)
-            throw new AnalyzeError(ErrorCode.InvalidReturnTYpe,
-                    currentToken().getStartPos(), "expr表达式返回类型不合预期");
+//        if(valueType != ValueType.INT)
+//            throw new AnalyzeError(ErrorCode.InvalidReturnTYpe,
+//                    currentToken().getStartPos(), "expr表达式返回类型不合预期");
 
         function.addInstruction(new Instruction(Operation.BR_TRUE, 1));
         int brForwardID = function.addInstruction(new Instruction(Operation.BR, 0));
@@ -548,18 +548,17 @@ public final class Analyser {
             }
             else if(peekTokenType == TokenType.AS_KW){
                 next();
-                TokenType tokenType = expect(TokenType.TY).getTokenType();
+                String type = expect(TokenType.TY).getValueString();
                 // 注意&&和||的优先级
-                if(operatorStack.getTop() > typeStack.getTop() || (tokenType != TokenType.UINT_LITERAL && tokenType !=
-                        TokenType.DOUBLE_LITERAL) || typeStack.getTop() <= 0){
+                if(operatorStack.getTop() > typeStack.getTop() || (!type.equals("int") && !type.equals("double")) || typeStack.getTop() <= 0){
                     throw new AnalyzeError(ErrorCode.InvalidStructure, peek.getStartPos(), "无法进行类型转换");
                 }
-                if (typeStack.getTopElement() == ValueType.INT && tokenType == TokenType.DOUBLE_LITERAL){
+                if (typeStack.getTopElement() == ValueType.INT && type.equals("double")){
                     typeStack.pop();
                     typeStack.push(ValueType.DOUBLE);
                     function.addInstruction(new Instruction(Operation.ITOF));
                 }
-                else if (typeStack.getTopElement() == ValueType.DOUBLE && tokenType == TokenType.UINT_LITERAL){
+                else if (typeStack.getTopElement() == ValueType.DOUBLE && type.equals("int")){
                     typeStack.pop();
                     typeStack.push(ValueType.INT);
                     function.addInstruction(new Instruction(Operation.FTOI));
@@ -721,13 +720,13 @@ public final class Analyser {
                 return standardIn(Operation.PRINTLN, ValueType.VOID, function);
             }
             case "putint" -> {
-                return standardOut(Operation.PRINT_I, function);
+                return standardOut(Operation.PRINT_I, ValueType.INT, function);
             }
             case "putdouble" -> {
-                return standardOut(Operation.PRINT_F, function);
+                return standardOut(Operation.PRINT_F, ValueType.DOUBLE,function);
             }
             case "putchar" -> {
-                return standardOut(Operation.PRINT_C, function);
+                return standardOut(Operation.PRINT_C, ValueType.INT, function);
             }
             case "putstr" -> {
                 expect(TokenType.L_PAREN);
@@ -779,9 +778,9 @@ public final class Analyser {
         return valueType;
     }
 
-    private ValueType standardOut(Operation operation, Function function) throws CompileError {
+    private ValueType standardOut(Operation operation, ValueType valueType, Function function) throws CompileError {
         expect(TokenType.L_PAREN);
-        if (analyseExpr(function) != ValueType.INT)
+        if (analyseExpr(function) != valueType)
             throw new AnalyzeError(ErrorCode.TypeNotMatch, peek().getStartPos(), "参数应该是int类型");
         expect(TokenType.R_PAREN);
         function.addInstruction(new Instruction(operation));
