@@ -475,8 +475,8 @@ public final class Analyser {
                     currentToken().getStartPos(), "continue只能用在while循环中");
         next(); // continue
         expect(TokenType.SEMICOLON);
-        int id = function.addInstruction(new Instruction(Operation.BR, 0));
-        function.setInstructionValue(id, inWhile - id);
+        int t = function.getInstructionCount();
+        function.addInstruction(new Instruction(Operation.BR, inWhile - t));
     }
 
     private void analyseReturnStmt(Function function) throws CompileError {
