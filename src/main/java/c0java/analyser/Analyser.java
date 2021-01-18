@@ -402,11 +402,11 @@ public final class Analyser {
             else {
                 analyseBlockStmt(function, inWhile);
             }
-            int br0 = function.addInstruction(new Instruction(Operation.BR, 0)); // 模仿助教
+            int br0 = function.addInstruction(new Instruction(Operation.NOP)); // 模仿助教
             function.setInstructionValue(label2, br0 - label2);
         }
         else{
-            int br0 = function.addInstruction(new Instruction(Operation.BR, 0)); // 模仿助教
+            int br0 = function.addInstruction(new Instruction(Operation.NOP)); // 模仿助教
             function.setInstructionValue(label1, br0 - label1);
         }
     }
