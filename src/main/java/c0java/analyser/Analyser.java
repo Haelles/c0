@@ -803,7 +803,7 @@ public final class Analyser {
             return ValueType.DOUBLE;
         }
         else if (t == TokenType.CHAR_LITERAL){
-            long value = Long.parseLong(peek().getValueString());
+            long value = peek().getValueString().charAt(0);
             function.addInstruction(new Instruction(Operation.PUSH, value));
             next();
             return ValueType.INT;
