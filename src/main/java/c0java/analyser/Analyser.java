@@ -442,6 +442,7 @@ public final class Analyser {
         for(Instruction instruction : instructions){
             if(instruction.getRecordBreak() == 0x3f3f3f3f){
                 instruction.setX(ed - i);
+                instruction.setRecordBreak();
             }
             i++;
         }

@@ -124,6 +124,10 @@ public class Instruction {
         this.opt = opt;
     }
 
+    public void setRecordBreak(){
+        recordBreak = 0;
+    }
+
     public Integer getX() {
         return x;
     }
