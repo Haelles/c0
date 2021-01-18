@@ -100,6 +100,14 @@ public class Function extends Symbol {
         }
     }
 
+    public int getInstructionCount(){
+        return instructions.size();
+    }
+
+    public Instruction getInstruction(int i){
+        return instructions.get(i);
+    }
+
     public ValueType getReturnValueType(){
         return returnValueType;
     }

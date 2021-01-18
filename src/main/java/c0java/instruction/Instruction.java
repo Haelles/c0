@@ -98,6 +98,7 @@ public class Instruction {
         this.opt = opt;
         this.x = x;
         this.recordBreak = recordBreak;
+        chooseDataType = 1;
     }
 
     @Override

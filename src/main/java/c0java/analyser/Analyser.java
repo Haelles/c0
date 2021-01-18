@@ -415,7 +415,7 @@ public final class Analyser {
         // while_stmt -> 'while' expr block_stmt
         next();
         // 根据助教代码，br0指令作为while部分的开端
-        int br0 = function.addInstruction(new Instruction(Operation.BR, 0));
+        int x = function.addInstruction(new Instruction(Operation.NOP));
 
         ValueType valueType = analyseExpr(function);
 //        if(valueType != ValueType.INT)
@@ -423,21 +423,36 @@ public final class Analyser {
 //                    currentToken().getStartPos(), "expr表达式返回类型不合预期");
 
         function.addInstruction(new Instruction(Operation.BR_TRUE, 1));
-        int brForwardID = function.addInstruction(new Instruction(Operation.BR, 0));
+        int id = function.addInstruction(new Instruction(Operation.BR, 0));
         // 需要一个新的符号表
         SymbolTable symbolTable = new SymbolTable();
         symbolTableStack.push(symbolTable);
-        analyseBlockStmt(function, br0);
+        analyseBlockStmt(function, x);
         symbolTableStack.pop();
+
+        int ed = function.getInstructionCount();
         // while指令的结束
-        int brBackID = function.addInstruction(new Instruction(Operation.BR, 0));
+        function.addInstruction(new Instruction(Operation.BR, x - ed - 1));
+        ed = function.addInstruction(new Instruction(Operation.NOP));
+        Instruction jmp = function.getInstruction(id);
+        jmp.setX(ed - id);
 
-        // 设置向前和向后的指令数
-        function.setInstructionValue(brForwardID, brBackID - brForwardID);
-        function.setInstructionValue(brBackID,  br0 - brBackID);
+        ArrayList<Instruction> instructions = function.getInstructions();
+        int i = 0;
+        for(Instruction instruction : instructions){
+            if(instruction.getRecordBreak() == 0x3f3f3f3f){
+                instruction.setX(ed - i);
+            }
+            i++;
+        }
 
-        // 添加break和continue
-        function.setBreakPos(br0, brBackID);
+        //
+//        // 设置向前和向后的指令数
+//        function.setInstructionValue(brForwardID, brBackID - brForwardID);
+//        function.setInstructionValue(brBackID,  br0 - brBackID);
+//
+//        // 添加break和continue
+//        function.setBreakPos(br0, brBackID);
 
     }
 
